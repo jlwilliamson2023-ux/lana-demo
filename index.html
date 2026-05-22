@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>LANA</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LANA">
+<meta name="theme-color" content="#0a0e14">
+<link rel="apple-touch-icon" href="/icon.png">
+<style>
+  :root{ --bg:#0a0e14; --card:#131a24; --line:#1f2a38; --txt:#e6edf3;
+         --dim:#8b98a8; --ok:#2ee6a0; --bad:#ff5d5d; --warn:#ffc857; --accent:#5b9dff; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
+       padding:18px;max-width:760px;margin:0 auto}
+  header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
+  h1{font-size:30px;margin:0;letter-spacing:3px;font-weight:700}
+  h1 .dot{color:var(--ok)}
+  .clock{color:var(--dim);font-size:13px;margin-bottom:18px}
+  /* health meter */
+  .meter{display:flex;align-items:center;gap:18px;background:var(--card);
+         border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+  .ring{width:84px;height:84px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
+        position:relative}
+  .ring::after{content:"";position:absolute;inset:9px;border-radius:50%;background:var(--card)}
+  .ring span{position:relative;z-index:1;font-size:21px;font-weight:700}
+  .meter .mlabel{font-size:19px;font-weight:700}
+  .meter .msub{color:var(--dim);font-size:13px;margin-top:3px}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px}
+  .stat .n{font-size:26px;font-weight:700}
+  .stat .l{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+        padding:6px 16px;margin-bottom:14px}
+  .ctrl{padding:14px 16px}
+  .ctrl .crow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .pillstate{font-weight:700}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  button{background:#1c2735;color:var(--txt);border:1px solid var(--line);border-radius:10px;
+         padding:9px 13px;font-size:13px;font-weight:600;cursor:pointer}
+  button:active{transform:scale(.96)}
+  button.warn{background:#3a2a12;border-color:#5a431c;color:var(--warn)}
+  button.go{background:#10362a;border-color:#1c5b46;color:var(--ok)}
+  button.danger{background:#3a1717;border-color:#5a1c1c;color:var(--bad)}
+  .row{display:flex;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:none}
+  .pill{width:10px;height:10px;border-radius:50%;margin-right:12px;flex:0 0 auto}
+  .up{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+  .down{background:var(--bad);box-shadow:0 0 8px var(--bad)}
+  .stale{background:var(--warn);box-shadow:0 0 8px var(--warn)}
+  .row .nm{font-weight:600;flex:1}
+  .row .meta{color:var(--dim);font-size:12px;text-align:right}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);
+     margin:22px 0 8px 4px}
+  .ev{padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .ev:last-child{border-bottom:none}
+  .ev .t{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:8px;font-size:12px}
+  .qitem{padding:11px 0;border-bottom:1px solid var(--line)}
+  .qitem:last-child{border-bottom:none}
+  .qitem .qh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+  .qitem .qn{font-weight:600}
+  .qitem .qc{color:var(--warn);font-size:12px;font-variant-numeric:tabular-nums}
+  .qitem .qs{color:var(--dim);font-size:13px;margin:3px 0 8px}
+  .qitem .qbtns{display:flex;gap:8px}
+  .qitem .qbtns button{padding:6px 11px;font-size:12px}
+  .empty{color:var(--dim);font-style:italic;padding:10px 0}
+  .foot{text-align:center;color:var(--dim);font-size:11px;margin-top:22px}
+  .refresh{color:var(--accent);font-size:12px}
+  /* memory items */
+  .mi{padding:10px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:flex-start}
+  .mi:last-child{border-bottom:none}
+  .mi .mtxt{flex:1}
+  .mi .mwho{font-weight:600}
+  .mi .mmeta{color:var(--dim);font-size:12px;margin-top:2px}
+  .mi .due{color:var(--warn);font-size:12px;font-weight:600}
+  .mi button{padding:6px 10px;font-size:12px}
+  /* toggles */
+  .tog{display:inline-flex;align-items:center;gap:7px;background:#1c2735;border:1px solid var(--line);
+       border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer}
+  .tog .led{width:9px;height:9px;border-radius:50%}
+  .tog .on{background:var(--ok);box-shadow:0 0 7px var(--ok)}
+  .tog .off{background:var(--bad)}
+  /* search + compose */
+  input,select,textarea{width:100%;background:#0c1218;color:var(--txt);border:1px solid var(--line);
+       border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;margin:5px 0}
+  textarea{min-height:74px;resize:vertical}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 16px;margin-bottom:14px}
+  summary{cursor:pointer;font-weight:600;padding:11px 0;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  .bars{display:flex;align-items:flex-end;gap:2px;height:54px;margin:8px 0}
+  .bar{flex:1;background:var(--accent);border-radius:2px 2px 0 0;min-height:2px;opacity:.85}
+  .ok{color:var(--ok)} .muted{color:var(--dim);font-size:12px}
+</style>
+<script>(function(){var D={status:{"time": "9:41:00 AM \u2014 Friday, May 22 2026", "health": {"score": 100, "healthy": 13, "total": 13, "label": "All systems healthy", "state": "ok"}, "control": {"state": "active", "paused_until": 0, "quiet_enabled": true, "quiet_start": 22, "quiet_end": 7, "text_enabled": true, "email_enabled": true}, "cost": {"cost": 2.14, "in": 184000, "out": 39000}, "memory": {"commitments": [{"id": "d1", "who": "Marcus (seller agent)", "text": "send signed LOI on Oakwood", "due": "2026-05-23", "done": false}, {"id": "d2", "who": "Lender", "text": "submit updated financials", "due": "2026-05-26", "done": false}], "followups": [{"id": "f1", "who": "Property manager", "channel": "email", "summary": "needs approval on the new roof bid ($14k)"}]}, "priority": {"due_today": [{"id": "d1", "who": "Marcus", "text": "send signed LOI on Oakwood", "due": "2026-05-23"}], "followups": [{"id": "f1", "who": "Property manager", "summary": "needs approval on the new roof bid ($14k)"}]}, "finance": {"total": 3284.55, "count": 11, "categories": [{"name": "real estate", "amount": 1850.0}, {"name": "software", "amount": 612.55}, {"name": "travel", "amount": 489.0}, {"name": "dining", "amount": 218.0}, {"name": "fuel", "amount": 115.0}], "recent": [{"merchant": "Home Depot", "amount": 842.19, "date": "2026-05-21", "category": "real estate"}, {"merchant": "Delta Air Lines", "amount": 489.0, "date": "2026-05-20", "category": "travel"}, {"merchant": "QuickBooks", "amount": 90.0, "date": "2026-05-20", "category": "software"}]}, "upcoming": [{"type": "travel", "summary": "Flight DFW\u2192PHX, Tue 6:05 AM (deal tour)", "when": "2026-05-27"}, {"type": "package", "summary": "Smart locks (8) out for delivery", "when": "2026-05-23"}], "backup": {"count": 14, "latest": "lana-backup-20260522-033000.tar.gz", "latest_when": "May 22 03:30"}, "tasks": [{"id": "t1", "text": "Review roof bid and approve", "due": "2026-05-22", "who": "Property manager", "done": false}, {"id": "t2", "text": "Wire earnest money for Oakwood", "due": "2026-05-23", "who": "", "done": false}, {"id": "t3", "text": "Call insurance about RV park policy", "due": "", "who": "", "done": false}], "decisions": [{"id": "x1", "text": "Going with the Oakwood 8-unit over Riverside \u2014 better cap rate", "when": "2026-05-21T16:20"}, {"id": "x2", "text": "Standardizing on QuickBooks for all entities", "when": "2026-05-19T11:05"}], "deals": [{"id": "g1", "name": "Oakwood 8-unit multifamily", "stage": "closing", "value": "$1.2M", "who": "Marcus (seller agent)", "next_action": "send signed LOI"}, {"id": "g2", "name": "Sunset RV Park (42 pads)", "stage": "negotiating", "value": "$2.8M", "who": "owner direct", "next_action": "counter at $2.65M"}, {"id": "g3", "name": "Maple Duplex", "stage": "lead", "value": "$320k", "who": "Zillow FSBO", "next_action": "schedule walkthrough"}], "approvals": [{"id": "a1", "kind": "email", "summary": "Email Marcus \u2014 LOI follow-up + close timeline", "source": "agent", "created": "2026-05-22T09:38"}, {"id": "a2", "kind": "text", "summary": "Text property manager: approved on the $14k roof bid", "source": "agent", "created": "2026-05-22T09:39"}], "workflows": [{"id": "w1", "name": "Lender emails", "trigger_type": "email_from", "trigger_value": "lender", "action_type": "priority", "enabled": true}, {"id": "w2", "name": "Offer keyword", "trigger_type": "email_subject", "trigger_value": "offer", "action_type": "add_task", "enabled": true}, {"id": "w3", "name": "Wife texts", "trigger_type": "text_contains", "trigger_value": "pick up", "action_type": "notify", "enabled": true}], "contacts": [{"name": "Marcus (seller agent)", "rule": "vip"}, {"name": "Spam Likely", "rule": "muted"}], "trends": {"top_contacts": [{"name": "Marcus", "count": 14}, {"name": "Property mgr", "count": 9}, {"name": "Lender", "count": 7}, {"name": "Spouse", "count": 6}], "by_hour": [0, 0, 0, 0, 0, 0, 1, 3, 6, 9, 7, 5, 8, 6, 4, 7, 5, 3, 4, 2, 1, 0, 0, 0]}, "services": [{"name": "iMessage Secretary", "ok": true, "alive": true, "pid": 4101, "scheduled": false}, {"name": "Email Secretary", "ok": true, "alive": true, "pid": 4102, "scheduled": false}, {"name": "Voice / Command", "ok": true, "alive": true, "pid": 4103, "scheduled": false}, {"name": "Hey LANA / F5", "ok": true, "alive": true, "pid": 4104, "scheduled": false}, {"name": "Agent Engine", "ok": true, "alive": true, "pid": 4105, "scheduled": false}, {"name": "Calendar Sync", "ok": true, "alive": true, "pid": 0, "scheduled": true}, {"name": "Morning Briefing", "ok": true, "alive": true, "pid": 0, "scheduled": true}, {"name": "Meeting Prep", "ok": true, "alive": true, "pid": 0, "scheduled": true}, {"name": "Daily Backup", "ok": true, "alive": true, "pid": 0, "scheduled": true}, {"name": "Health Watchdog", "ok": true, "alive": true, "pid": 0, "scheduled": true}], "imessage": {"replies_today": 47, "recent": [{"time": "09:36", "text": "Marcus: \u201cocean view unit still available?\u201d \u2192 yep, 201 is open. want me to send the lease?"}, {"time": "09:18", "text": "Spouse: \u201ccan you grab dinner?\u201d \u2192 yeah on it, home by 6"}, {"time": "08:52", "text": "Contractor: \u201croof done thursday\u201d \u2192 perfect, send the invoice when ready"}]}, "email": {"replies_today": 12, "recent": [{"time": "09:30", "text": "Re: Oakwood financials \u2014 attached the updated rent roll and T-12, let me know..."}, {"time": "08:40", "text": "Re: Insurance quote \u2014 thanks, the RV park coverage looks good, let's bind it."}], "queue": [{"id": "q1", "name": "Title company", "subject": "Closing docs for review", "fires_at": 9999999999}], "held_reason": ""}},agent:{"task": "Research current multifamily cap rates in Dallas and build a comparison", "done": true, "steps": [{"kind": "start", "detail": "Research current multifamily cap rates in Dallas and build a comparison", "t": "09:40:01"}, {"kind": "tool", "detail": "web_search: Dallas multifamily cap rates 2026", "t": "09:40:04"}, {"kind": "think", "detail": "Found current ranges from CBRE and Marcus & Millichap. Compiling.", "t": "09:40:09"}, {"kind": "tool", "detail": "run_python: build cap_rate_comparison.xlsx", "t": "09:40:12"}, {"kind": "done", "detail": "Built the comparison spreadsheet with 5 submarkets.", "t": "09:40:15"}], "result": "Done \u2705 Dallas multifamily cap rates are currently averaging ~5.4%\u20136.2% depending on submarket and class. I built **cap_rate_comparison.xlsx** comparing 5 submarkets (Uptown, Plano, Frisco, Arlington, Garland) with class A/B/C cap rate ranges and a notes column. Frisco class-B looks like the best risk-adjusted entry right now.", "files": ["cap_rate_comparison.xlsx"]},docs:{"documents": [{"name": "cap_rate_comparison.xlsx", "size": 6144, "when": "May 22 09:40"}, {"name": "oakwood_LOI.pdf", "size": 18432, "when": "May 21 16:22"}, {"name": "Q2_investor_update.docx", "size": 12288, "when": "May 20 14:10"}]},audit:{"entries": [{"when": "05-22 09:36", "channel": "text", "to": "Marcus", "content": "yep, 201 is open. want me to send the lease?"}, {"when": "05-22 09:30", "channel": "email", "to": "Title company", "content": "thanks, reviewing the closing docs now."}, {"when": "05-22 08:52", "channel": "text", "to": "Contractor", "content": "perfect, send the invoice when ready."}, {"when": "05-21 17:14", "channel": "email", "to": "Lender", "content": "attached the updated T-12 and rent roll for Oakwood."}]}};window.fetch=function(u,o){u=''+u;var b={};if(u.indexOf('/agent-status')>=0)b=D.agent;else if(u.indexOf('/status')>=0)b=D.status;else if(u.indexOf('/documents')>=0)b=D.docs;else if(u.indexOf('/audit')>=0)b=D.audit;else if(u.indexOf('/agent-task')>=0)b={ok:true,id:'demo'};else if(u.indexOf('/document')>=0)return Promise.resolve({ok:true,text:function(){return Promise.resolve('Sample document — LANA demo.');},json:function(){return Promise.resolve({});}});else if(o&&o.method==='POST')b={ok:true,demo:true};return Promise.resolve({ok:true,json:function(){return Promise.resolve(b);},text:function(){return Promise.resolve(JSON.stringify(b));}});};if('serviceWorker' in navigator){navigator.serviceWorker.register=function(){return Promise.reject('demo');};}})();</script></head>
+<body>
+  <header>
+    <h1>LANA<span class="dot">.</span></h1>
+    <span class="refresh" id="pulse">●</span>
+  </header>
+  <div class="clock" id="clock">loading…</div>
+
+  <!-- overall health meter -->
+  <div class="meter">
+    <div class="ring" id="ring"><span id="ringPct">–</span></div>
+    <div>
+      <div class="mlabel" id="healthLabel">checking…</div>
+      <div class="msub" id="healthSub"></div>
+    </div>
+  </div>
+
+  <!-- agent console: give LANA any task -->
+  <div class="card">
+    <div style="font-weight:700;padding:8px 0">🤖 Give LANA a task</div>
+    <textarea id="agentTask" placeholder="e.g. research the top 3 RV-park management platforms and build me a comparison spreadsheet"></textarea>
+    <div class="btns"><button class="go" onclick="runAgent()">Run task</button></div>
+    <div id="agentSteps" class="muted" style="margin-top:8px;line-height:1.7"></div>
+    <div id="agentResult"></div>
+  </div>
+
+  <!-- approvals: actions waiting for your tap -->
+  <div class="card" id="approvalsCard" style="display:none;border-color:var(--warn)">
+    <div style="font-weight:700;padding:8px 0">✋ Waiting for your approval</div>
+    <div id="approvals"></div>
+  </div>
+
+  <!-- priority: what needs you now -->
+  <div class="card" id="priorityCard" style="display:none">
+    <div style="font-weight:700;padding:8px 0">🎯 Needs you now</div>
+    <div id="priority"></div>
+  </div>
+
+  <div class="grid">
+    <div class="stat"><div class="n" id="imsg">–</div><div class="l">Texts today</div></div>
+    <div class="stat"><div class="n" id="emails">–</div><div class="l">Emails today</div></div>
+    <div class="stat"><div class="n" id="cost">–</div><div class="l">API spend today</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="stat"><div class="n" id="spend">–</div><div class="l">Spend (7d)</div></div>
+    <div class="stat"><div class="n" id="upcomingN">–</div><div class="l">Incoming items</div></div>
+    <div class="stat"><div class="n" id="backupWhen" style="font-size:15px;padding-top:8px">–</div><div class="l">Last backup</div></div>
+  </div>
+
+  <!-- pause / quiet controls -->
+  <div class="card ctrl">
+    <div class="crow">
+      <div>Auto-reply: <span class="pillstate" id="ctrlState">…</span></div>
+    </div>
+    <div class="btns">
+      <button onclick="pause(30)">Pause 30m</button>
+      <button class="warn" onclick="pause(60)">Pause 1h</button>
+      <button class="warn" onclick="pause(120)">Pause 2h</button>
+      <button class="go" onclick="resume()">Resume</button>
+      <button id="quietBtn" onclick="toggleQuiet()">Quiet hours: …</button>
+    </div>
+    <div class="btns" style="margin-top:6px">
+      <span class="tog" id="togText"  onclick="toggleFeat('text_enabled')"><span class="led"></span> Texts</span>
+      <span class="tog" id="togEmail" onclick="toggleFeat('email_enabled')"><span class="led"></span> Email</span>
+    </div>
+  </div>
+
+  <!-- tasks -->
+  <h2>Tasks</h2>
+  <div class="card">
+    <div class="two" style="grid-template-columns:1fr auto;gap:6px">
+      <input id="taskText" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addTask()">
+      <button class="go" onclick="addTask()">Add</button>
+    </div>
+    <div id="tasks"></div>
+  </div>
+
+  <!-- deals pipeline -->
+  <details ontoggle="if(this.open)renderDeals()">
+    <summary>📊 Deal pipeline</summary>
+    <div style="padding-bottom:12px">
+      <div id="deals"></div>
+      <div class="two" style="grid-template-columns:1fr auto;gap:6px;margin-top:8px">
+        <input id="dealName" placeholder="New deal name…">
+        <button class="go" onclick="addDeal()">Add</button>
+      </div>
+    </div>
+  </details>
+
+  <!-- workflow automation -->
+  <details ontoggle="if(this.open)renderWorkflows()">
+    <summary>⚙️ Automations (when X, do Y)</summary>
+    <div style="padding-bottom:12px">
+      <div id="workflows"></div>
+      <div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">
+        <input id="wfName" placeholder="Rule name (e.g. 'Lender emails')">
+        <div class="two">
+          <select id="wfTrigType">
+            <option value="email_from">Email from contains</option>
+            <option value="email_subject">Email subject contains</option>
+            <option value="email_body">Email body contains</option>
+            <option value="text_contains">Text contains</option>
+          </select>
+          <input id="wfTrigVal" placeholder="trigger text">
+        </div>
+        <div class="two">
+          <select id="wfActType">
+            <option value="notify">Alert me</option>
+            <option value="add_task">Create a task</option>
+            <option value="priority">Flag as priority</option>
+          </select>
+          <input id="wfActVal" placeholder="message / task (optional)">
+        </div>
+        <button class="go" onclick="addWorkflow()">Add rule</button>
+      </div>
+    </div>
+  </details>
+
+  <!-- decisions log -->
+  <details>
+    <summary>🧭 Decision log</summary>
+    <div style="padding-bottom:12px">
+      <div class="two" style="grid-template-columns:1fr auto;gap:6px">
+        <input id="decText" placeholder="Log a decision…" onkeydown="if(event.key==='Enter')addDecision()">
+        <button class="go" onclick="addDecision()">Log</button>
+      </div>
+      <div id="decisions"></div>
+    </div>
+  </details>
+
+  <h2>Needs your reply</h2>
+  <div id="followups"><div class="empty">…</div></div>
+
+  <h2>Commitments</h2>
+  <div id="commitments"><div class="empty">…</div></div>
+
+  <div class="card" id="svc"></div>
+
+  <h2>Pending email replies</h2>
+  <div id="queue"><div class="empty">…</div></div>
+
+  <!-- notifications -->
+  <details>
+    <summary>🔔 Notifications</summary>
+    <div style="padding-bottom:12px">
+      <div class="btns">
+        <span class="tog" id="togMac"    onclick="toggleNotify('mac_enabled')"><span class="led"></span> Mac banners</span>
+        <span class="tog" id="togPhone"  onclick="toggleNotify('iphone_enabled')"><span class="led"></span> iPhone (iMessage)</span>
+      </div>
+      <div class="btns" style="margin-top:8px">
+        <button class="go" onclick="testNotify()">Send test notification</button>
+        <button id="webpushBtn" onclick="enableWebPush()">Enable in-app push</button>
+      </div>
+      <div class="muted" id="pushState" style="margin-top:8px"></div>
+    </div>
+  </details>
+
+  <!-- documents the agent produced -->
+  <details ontoggle="if(this.open)loadDocs()">
+    <summary>📁 Documents</summary>
+    <div id="docList" style="padding-bottom:12px"></div>
+  </details>
+
+  <!-- what's coming (packages + travel) -->
+  <details>
+    <summary>📦 What's coming</summary>
+    <div style="padding-bottom:12px" id="upcoming"></div>
+  </details>
+
+  <!-- spending -->
+  <details>
+    <summary>💳 Spending (7 days)</summary>
+    <div style="padding-bottom:12px" id="spendList"></div>
+  </details>
+
+  <!-- audit log -->
+  <details ontoggle="if(this.open)loadAudit()">
+    <summary>📒 Audit log — everything LANA sent</summary>
+    <div style="padding-bottom:12px">
+      <input id="auditQ" placeholder="Search sent messages…" oninput="loadAudit()">
+      <div id="auditList"></div>
+    </div>
+  </details>
+
+  <!-- backup -->
+  <details>
+    <summary>💾 Backup</summary>
+    <div style="padding-bottom:12px">
+      <div class="muted" id="backupInfo"></div>
+      <div class="btns"><button class="go" onclick="backupNow()">Back up now</button></div>
+      <div class="muted" id="backupMsg" style="margin-top:6px"></div>
+    </div>
+  </details>
+
+  <!-- conversations -->
+  <details ontoggle="if(this.open)loadThreads()">
+    <summary>💬 Conversations</summary>
+    <div style="padding-bottom:12px">
+      <div id="threadList"><div class="empty">…</div></div>
+      <div id="threadView"></div>
+    </div>
+  </details>
+
+  <!-- relationships / CRM -->
+  <details ontoggle="if(this.open)loadCRM()">
+    <summary>🤝 Relationships</summary>
+    <div style="padding-bottom:12px">
+      <div id="crmStale"></div>
+      <div id="crmPeople"><div class="empty">…</div></div>
+    </div>
+  </details>
+
+  <!-- contact rules -->
+  <details>
+    <summary>👥 Contact rules</summary>
+    <div style="padding-bottom:12px">
+      <div id="contactRules"></div>
+      <input id="ctName" placeholder="Contact name (e.g. Ryan)">
+      <div class="btns">
+        <button class="warn" onclick="contactAct('vip')">★ VIP</button>
+        <button class="danger" onclick="contactAct('mute')">🔇 Mute</button>
+        <button onclick="contactAct('snooze')">😴 Snooze 4h</button>
+        <button class="go" onclick="contactAct('clear')">Clear</button>
+      </div>
+    </div>
+  </details>
+
+  <!-- compose as me -->
+  <details>
+    <summary>✏️ Compose as me</summary>
+    <div style="padding-bottom:12px">
+      <select id="cChan" onchange="cChanChange()">
+        <option value="text">Text (iMessage)</option>
+        <option value="email">Email</option>
+      </select>
+      <input id="cTo" placeholder="To (phone # or email)">
+      <input id="cSubj" placeholder="Subject" style="display:none">
+      <textarea id="cBody" placeholder="Message — sends in your name"></textarea>
+      <button class="go" onclick="composeSend()">Send as Landon</button>
+      <span id="cMsg" class="muted"></span>
+    </div>
+  </details>
+
+  <!-- search -->
+  <details>
+    <summary>🔎 Search what LANA handled</summary>
+    <div style="padding-bottom:12px">
+      <input id="q" placeholder="Search names / words…" oninput="doSearch()">
+      <div id="searchRes"></div>
+    </div>
+  </details>
+
+  <!-- VIP + trends -->
+  <details>
+    <summary>📈 Top contacts &amp; activity</summary>
+    <div style="padding-bottom:12px">
+      <div id="vip"></div>
+      <div class="muted" style="margin-top:10px">Replies by hour (today)</div>
+      <div class="bars" id="bars"></div>
+    </div>
+  </details>
+
+  <h2>Recent texts</h2>
+  <div id="imsgList"><div class="empty">…</div></div>
+
+  <h2>Recent emails</h2>
+  <div id="emailList"><div class="empty">…</div></div>
+
+  <div class="foot">auto-refreshing every 10s · LANA secretary</div>
+
+<script>
+const TOKEN="demo";
+let QUIET=false, QS=22, QE=7;
+let FEAT={text_enabled:true, email_enabled:true};
+function esc(s){return (s||"").replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function setTog(id,on){
+  const el=document.getElementById(id); if(!el) return;
+  el.querySelector('.led').className='led '+(on?'on':'off');
+  el.style.opacity=on?'1':'0.6';
+}
+function evList(arr){
+  if(!arr||!arr.length) return '<div class="empty">nothing yet</div>';
+  return arr.slice().reverse().map(e=>
+    `<div class="ev"><span class="t">${esc(e.time)}</span><span>${esc(e.text)}</span></div>`).join('');
+}
+function countdown(fires){
+  const s=Math.round(fires-Date.now()/1000);
+  if(s<=0) return "sending…";
+  const m=Math.floor(s/60), r=s%60; return `${m}m ${r}s`;
+}
+async function post(path, body){
+  body.token=TOKEN;
+  try{ await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},
+       body:JSON.stringify(body)}); }catch(e){}
+  load();
+}
+function pause(m){ post('/control',{action:'pause',minutes:m}); }
+function resume(){ post('/control',{action:'resume'}); }
+function toggleQuiet(){ post('/control',{action:'quiet',enabled:!QUIET,start:QS,end:QE}); }
+function toggleFeat(f){ post('/control',{action:'toggle',feature:f,on:!FEAT[f]}); }
+function cancelEmail(id){ post('/email-action',{action:'cancel',id}); }
+function sendNow(id){ post('/email-action',{action:'send_now',id}); }
+function resolveMem(kind,id){ post('/memory-action',{kind,id}); }
+
+// Approvals
+async function approve(id,action){ await post('/approval-action',{id,action}); }
+// Workflows
+let LAST_WF=[];
+const TRIG_LBL={email_from:'email from',email_subject:'email subject',email_body:'email body',text_contains:'text contains'};
+const ACT_LBL={notify:'alert me',add_task:'create task',priority:'flag priority'};
+function renderWorkflows(){
+  const el=document.getElementById('workflows'); if(!el)return;
+  el.innerHTML=LAST_WF.length?LAST_WF.map(r=>
+    `<div class="mi"><div class="mtxt"><div class="mwho">${esc(r.name)} ${r.enabled?'':'<span class="muted">(off)</span>'}</div>`+
+    `<div class="mmeta">when ${esc(TRIG_LBL[r.trigger_type]||r.trigger_type)} "${esc(r.trigger_value)}" → ${esc(ACT_LBL[r.action_type]||r.action_type)}</div></div>`+
+    `<button onclick='toggleWf(${JSON.stringify(r.id)},${!r.enabled})'>${r.enabled?'Off':'On'}</button>`+
+    `<button onclick='removeWf(${JSON.stringify(r.id)})'>✕</button></div>`).join('')
+    :'<div class="empty">no automations yet</div>';
+}
+async function addWorkflow(){
+  const name=document.getElementById('wfName').value.trim();
+  const trigger_value=document.getElementById('wfTrigVal').value.trim();
+  if(!trigger_value){return;}
+  await post('/workflow-action',{action:'add',name,trigger_type:document.getElementById('wfTrigType').value,
+    trigger_value,action_type:document.getElementById('wfActType').value,action_value:document.getElementById('wfActVal').value.trim()});
+  document.getElementById('wfName').value='';document.getElementById('wfTrigVal').value='';document.getElementById('wfActVal').value='';
+}
+async function toggleWf(id,on){ await post('/workflow-action',{action:'toggle',id,on}); }
+async function removeWf(id){ await post('/workflow-action',{action:'remove',id}); }
+// Agent console
+let agentPoll=null;
+async function runAgent(){
+  const t=document.getElementById('agentTask').value.trim(); if(!t)return;
+  document.getElementById('agentSteps').textContent='⏳ working…';
+  document.getElementById('agentResult').innerHTML='';
+  try{
+    const r=await fetch('/agent-task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:t,token:TOKEN})});
+    const d=await r.json();
+    if(!d.id){ document.getElementById('agentSteps').textContent='failed: '+(d.error||''); return; }
+    clearInterval(agentPoll);
+    agentPoll=setInterval(()=>pollAgent(d.id),1500);
+  }catch(e){ document.getElementById('agentSteps').textContent='failed'; }
+}
+function stepIcon(k){return {start:'▶️',think:'💭',tool:'🔧',done:'✅',error:'⚠️',info:'ℹ️',limit:'⏱️'}[k]||'•';}
+async function pollAgent(id){
+  try{
+    const r=await fetch('/agent-status?id='+id+'&token='+encodeURIComponent(TOKEN),{cache:'no-store'});
+    const d=await r.json();
+    const steps=(d.steps||[]).map(s=>`${stepIcon(s.kind)} ${esc(s.detail)}`).join('<br>');
+    document.getElementById('agentSteps').innerHTML=steps||'⏳ working…';
+    if(d.done){
+      clearInterval(agentPoll);
+      const files=(d.files||[]).map(f=>`<a href="/document?name=${encodeURIComponent(f)}&token=${encodeURIComponent(TOKEN)}">📄 ${esc(f)}</a>`).join(' · ');
+      document.getElementById('agentResult').innerHTML=
+        `<div class="card" style="margin-top:8px;white-space:pre-wrap">${esc(d.result)}</div>`+
+        (files?`<div style="margin-top:6px">⬇ ${files}</div>`:'');
+      if(document.getElementById('docList')) loadDocs();
+    }
+  }catch(e){}
+}
+async function loadDocs(){
+  try{
+    const r=await fetch('/documents?token='+encodeURIComponent(TOKEN),{cache:'no-store'});
+    const d=await r.json();
+    document.getElementById('docList').innerHTML=(d.documents&&d.documents.length)
+      ? d.documents.map(x=>`<div class="row"><a class="nm" href="/document?name=${encodeURIComponent(x.name)}&token=${encodeURIComponent(TOKEN)}">${esc(x.name)}</a><span class="meta">${esc(x.when)} · ${Math.round(x.size/1024)}KB</span></div>`).join('')
+      : '<div class="empty">no documents yet — give LANA a task above</div>';
+  }catch(e){}
+}
+// Tasks
+let LAST_TASKS=[], LAST_DEALS=[];
+const DEAL_STAGES=["lead","active","negotiating","closing","won","lost"];
+async function addTask(){
+  const el=document.getElementById('taskText'); const v=el.value.trim(); if(!v)return;
+  el.value='';
+  await post('/task-action',{action:'add',text:v});
+}
+async function completeTask(id){ await post('/task-action',{action:'complete',id}); }
+async function addDecision(){
+  const el=document.getElementById('decText'); const v=el.value.trim(); if(!v)return;
+  el.value='';
+  await post('/decision-add',{text:v});
+}
+function renderDeals(){
+  const el=document.getElementById('deals'); if(!el)return;
+  el.innerHTML = LAST_DEALS.length ? LAST_DEALS.map(d=>{
+    const opts=DEAL_STAGES.map(s=>`<option ${s===d.stage?'selected':''}>${s}</option>`).join('');
+    return `<div class="mi"><div class="mtxt"><div class="mwho">${esc(d.name)}`+
+      (d.value?` <span class="muted">${esc(d.value)}</span>`:'')+`</div>`+
+      `<div class="mmeta">${esc(d.next_action||'no next action')}</div></div>`+
+      `<select onchange='updateDeal(${JSON.stringify(d.id)},this.value)' style="width:auto">${opts}</select>`+
+      `<button onclick='removeDeal(${JSON.stringify(d.id)})'>✕</button></div>`;
+  }).join('') : '<div class="empty">no deals tracked</div>';
+}
+async function addDeal(){
+  const el=document.getElementById('dealName'); const v=el.value.trim(); if(!v)return;
+  el.value='';
+  await post('/deal-action',{action:'add',name:v});
+}
+async function updateDeal(id,stage){ await post('/deal-action',{action:'update',id,stage}); }
+async function removeDeal(id){ await post('/deal-action',{action:'remove',id}); }
+// Audit log
+async function loadAudit(){
+  const q=document.getElementById('auditQ').value.trim();
+  try{
+    const r=await fetch('/audit?q='+encodeURIComponent(q)+'&token='+encodeURIComponent(TOKEN),{cache:'no-store'});
+    const d=await r.json(); const e=d.entries||[];
+    document.getElementById('auditList').innerHTML = e.length
+      ? e.map(x=>`<div class="ev"><span class="t">${esc(x.when)}</span>`+
+          `<span class="muted">[${esc(x.channel)}→${esc(x.to)}]</span> ${esc(x.content)}</div>`).join('')
+      : '<div class="empty">nothing logged yet</div>';
+  }catch(e){}
+}
+// Backup
+async function backupNow(){
+  document.getElementById('backupMsg').textContent='backing up…';
+  try{
+    const r=await fetch('/backup-now',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:TOKEN})});
+    const d=await r.json();
+    document.getElementById('backupMsg').textContent = d.ok?('✓ saved '+d.archive):('failed: '+(d.error||''));
+  }catch(e){ document.getElementById('backupMsg').textContent='failed'; }
+}
+// Conversations
+async function loadThreads(){
+  try{
+    const r=await fetch('/threads?token='+encodeURIComponent(TOKEN),{cache:'no-store'});
+    const d=await r.json(); const t=d.threads||[];
+    document.getElementById('threadList').innerHTML = (t.error||!t.length)
+      ? '<div class="empty">'+(t.error?esc(t.error):'no conversations')+'</div>'
+      : t.map(x=>`<div class="row" style="cursor:pointer" onclick='openThread(${JSON.stringify(x.chat_id)},${JSON.stringify(x.name)})'>`+
+          `<span class="nm">${esc(x.name)}</span><span class="meta">${esc(x.when)}</span></div>`+
+          `<div class="muted" style="margin:-6px 0 4px">${esc(x.last)}</div>`).join('');
+  }catch(e){}
+}
+async function openThread(id,name){
+  const v=document.getElementById('threadView');
+  v.innerHTML='<div class="muted">loading…</div>';
+  try{
+    const r=await fetch('/thread?id='+encodeURIComponent(id)+'&token='+encodeURIComponent(TOKEN),{cache:'no-store'});
+    const d=await r.json(); const m=d.messages||[];
+    v.innerHTML=`<div class="card" style="margin-top:8px"><div style="font-weight:700;padding:8px 0">${esc(name)}</div>`+
+      m.map(x=>`<div style="text-align:${x.me?'right':'left'};margin:5px 0">`+
+        `<span style="display:inline-block;max-width:80%;padding:7px 11px;border-radius:12px;`+
+        `background:${x.me?'#14402f':'#1c2735'}">${esc(x.text)}</span>`+
+        `<div class="muted" style="font-size:10px">${esc(x.when)}</div></div>`).join('')+`</div>`;
+  }catch(e){ v.innerHTML='<div class="empty">couldn\'t load</div>'; }
+}
+// Relationships / CRM
+async function loadCRM(){
+  try{
+    const r=await fetch('/crm?token='+encodeURIComponent(TOKEN),{cache:'no-store'});
+    const d=await r.json();
+    if(d.error){ document.getElementById('crmPeople').innerHTML='<div class="empty">'+esc(d.error)+'</div>'; return; }
+    const stale=d.stale||[], people=d.people||[];
+    document.getElementById('crmStale').innerHTML = stale.length
+      ? '<div class="card" style="margin-bottom:8px"><div style="font-weight:700;color:#ffc857;padding:6px 0">Reach out — going stale</div>'+
+        stale.map(p=>`<div class="row"><span class="nm">${esc(p.name)}</span><span class="meta" style="color:#ffc857">${p.days}d ago</span></div>`).join('')+'</div>'
+      : '';
+    document.getElementById('crmPeople').innerHTML = people.length
+      ? people.map(p=>`<div class="row"><span class="nm">${esc(p.name)}</span><span class="meta">${esc(p.when)}</span></div>`).join('')
+      : '<div class="empty">no recent contacts</div>';
+  }catch(e){}
+}
+// Contact rules
+function contactAct(action){
+  const name=document.getElementById('ctName').value.trim();
+  if(!name) return;
+  post('/contact-action',{name,action});
+  if(action==='clear') document.getElementById('ctName').value='';
+}
+function renderContacts(arr){
+  const el=document.getElementById('contactRules');
+  if(!el) return;
+  el.innerHTML = (arr&&arr.length)
+    ? arr.map(c=>`<div class="row"><span class="nm">${esc(c.name)}</span>`+
+        `<span class="meta">${esc(c.state)}</span></div>`).join('')
+    : '<div class="empty">no rules set</div>';
+}
+
+// Notifications
+let NOTIFY={mac_enabled:true, iphone_enabled:true};
+async function loadNotify(){
+  try{
+    const r=await fetch('/notify-settings?token='+encodeURIComponent(TOKEN),{cache:'no-store'});
+    const d=await r.json();
+    NOTIFY.mac_enabled=d.mac_enabled; NOTIFY.iphone_enabled=d.iphone_enabled;
+    setTog('togMac', d.mac_enabled); setTog('togPhone', d.iphone_enabled);
+  }catch(e){}
+}
+async function toggleNotify(field){
+  NOTIFY[field]=!NOTIFY[field];
+  const body={}; body[field]=NOTIFY[field]; body.token=TOKEN;
+  try{ await fetch('/notify-settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}catch(e){}
+  loadNotify();
+}
+async function testNotify(){
+  try{ await fetch('/notify-test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:TOKEN})});
+    document.getElementById('pushState').textContent='✓ test sent — check your Mac + phone';
+  }catch(e){}
+}
+// Service worker + web push (needs HTTPS — graceful on http)
+if('serviceWorker' in navigator && location.protocol==='https:'){
+  navigator.serviceWorker.register('/sw.js').catch(()=>{});
+}
+const VAPID_PUBLIC="";
+function urlB64ToUint8(b64){
+  const pad='='.repeat((4-b64.length%4)%4);
+  const s=(b64+pad).replace(/-/g,'+').replace(/_/g,'/');
+  const raw=atob(s); const arr=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++) arr[i]=raw.charCodeAt(i);
+  return arr;
+}
+async function enableWebPush(){
+  const el=document.getElementById('pushState');
+  if(location.protocol!=='https:'){
+    el.textContent='Open the app over HTTPS (https://landons-macbook-pro.tail190a8f.ts.net/dashboard) to enable in-app push. On http, alerts still come as iMessages.';
+    return;
+  }
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)){ el.textContent='this browser can\'t do web push'; return; }
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){ el.textContent='permission '+perm; return; }
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub){
+      sub=await reg.pushManager.subscribe({userVisibleOnly:true,
+        applicationServerKey:urlB64ToUint8(VAPID_PUBLIC)});
+    }
+    await fetch('/push-subscribe',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({subscription:sub,token:TOKEN})});
+    el.textContent='✓ in-app push enabled on this device';
+  }catch(e){ el.textContent='couldn\'t enable: '+e.message; }
+}
+
+function cChanChange(){
+  const em=document.getElementById('cChan').value==='email';
+  document.getElementById('cSubj').style.display=em?'block':'none';
+  document.getElementById('cTo').placeholder=em?'To (email)':'To (phone #)';
+}
+async function composeSend(){
+  const channel=document.getElementById('cChan').value;
+  const to=document.getElementById('cTo').value.trim();
+  const body=document.getElementById('cBody').value.trim();
+  const subject=document.getElementById('cSubj').value.trim();
+  if(!to||!body){ document.getElementById('cMsg').textContent='need a recipient and message'; return; }
+  document.getElementById('cMsg').textContent='sending…';
+  try{
+    const r=await fetch('/compose',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({channel,to,body,subject,token:TOKEN})});
+    const d=await r.json();
+    if(d.ok){ document.getElementById('cMsg').textContent='✓ sent'; document.getElementById('cBody').value=''; }
+    else document.getElementById('cMsg').textContent='failed: '+(d.error||'');
+  }catch(e){ document.getElementById('cMsg').textContent='failed'; }
+}
+let searchT=null;
+function doSearch(){
+  clearTimeout(searchT);
+  searchT=setTimeout(async()=>{
+    const q=document.getElementById('q').value.trim();
+    if(!q){ document.getElementById('searchRes').innerHTML=''; return; }
+    try{
+      const r=await fetch('/search?q='+encodeURIComponent(q)+'&token='+encodeURIComponent(TOKEN),{cache:'no-store'});
+      const d=await r.json();
+      const res=d.results||[];
+      document.getElementById('searchRes').innerHTML = res.length
+        ? res.slice().reverse().map(x=>`<div class="ev"><span class="t">${esc(x.time)}</span>`+
+          `<span class="muted">[${esc(x.channel)}]</span> ${esc(x.text)}</div>`).join('')
+        : '<div class="empty">no matches</div>';
+    }catch(e){}
+  },250);
+}
+function memList(arr,kind){
+  if(!arr||!arr.length) return '<div class="empty">nothing right now</div>';
+  return arr.slice().reverse().map(it=>{
+    if(kind==='commitment'){
+      const due=it.due?`<span class="due">due ${esc(it.due)}</span>`:'';
+      return `<div class="mi"><div class="mtxt"><div class="mwho">${esc(it.who||'')} ${due}</div>`+
+        `<div class="mmeta">${esc(it.text)}</div></div>`+
+        `<button class="go" onclick='resolveMem("commitment",${JSON.stringify(it.id)})'>Done</button></div>`;
+    } else {
+      return `<div class="mi"><div class="mtxt"><div class="mwho">${esc(it.who||'')} `+
+        `<span class="muted">[${esc(it.channel||'')}]</span></div>`+
+        `<div class="mmeta">${esc(it.summary)}</div></div>`+
+        `<button class="go" onclick='resolveMem("followup",${JSON.stringify(it.id)})'>Clear</button></div>`;
+    }
+  }).join('');
+}
+
+function renderQueue(d){
+  const q=d.email.queue||[];
+  if(!q.length){
+    const held=d.email.held_reason?` (held — ${esc(d.email.held_reason)})`:'';
+    document.getElementById('queue').innerHTML=`<div class="empty">no emails waiting${held}</div>`;
+    return;
+  }
+  document.getElementById('queue').innerHTML=q.map(e=>{
+    const when=e.held?'held':countdown(e.fires_at);
+    return `<div class="qitem"><div class="qh"><span class="qn">${esc(e.name)}</span>`+
+      `<span class="qc">${esc(when)}</span></div>`+
+      `<div class="qs">${esc(e.subject)}</div>`+
+      `<div class="qbtns"><button class="go" onclick='sendNow(${JSON.stringify(e.id)})'>Send now</button>`+
+      `<button class="danger" onclick='cancelEmail(${JSON.stringify(e.id)})'>Cancel</button></div></div>`;
+  }).join('');
+}
+async function load(){
+  try{
+    const r = await fetch('/status',{cache:'no-store'});
+    const d = await r.json();
+    document.getElementById('clock').textContent = d.time;
+    document.getElementById('imsg').textContent   = d.imessage.replies_today;
+    document.getElementById('emails').textContent = d.email.replies_today;
+    document.getElementById('cost').textContent   = '$'+(d.cost?d.cost.cost:0).toFixed(2);
+    // health ring
+    const h=d.health, col = h.state==='good'?'#2ee6a0':(h.state==='warn'?'#ffc857':'#ff5d5d');
+    const ring=document.getElementById('ring');
+    ring.style.background=`conic-gradient(${col} ${h.score}%, #1f2a38 0)`;
+    document.getElementById('ringPct').textContent=h.score+'%';
+    document.getElementById('ringPct').style.color=col;
+    document.getElementById('healthLabel').textContent=h.label;
+    document.getElementById('healthLabel').style.color=col;
+    document.getElementById('healthSub').textContent=`${h.healthy}/${h.total} services healthy`;
+    // control state
+    document.getElementById('ctrlState').textContent=d.control.state;
+    document.getElementById('ctrlState').style.color=
+      d.control.state==='active'||d.control.state.startsWith('active')?'#2ee6a0':'#ffc857';
+    QUIET=d.control.quiet_enabled; QS=d.control.quiet_start; QE=d.control.quiet_end;
+    document.getElementById('quietBtn').textContent=
+      `Quiet hours: ${QUIET?'ON':'OFF'} (${String(QS).padStart(2,'0')}–${String(QE).padStart(2,'0')})`;
+    // feature switches
+    FEAT.text_enabled=d.control.text_enabled; FEAT.email_enabled=d.control.email_enabled;
+    setTog('togText', d.control.text_enabled); setTog('togEmail', d.control.email_enabled);
+    // memory panels
+    document.getElementById('followups').innerHTML   = memList(d.memory.followups,'followup');
+    document.getElementById('commitments').innerHTML = memList(d.memory.commitments,'commitment');
+    // VIP + trends
+    const vip=(d.trends.top_contacts||[]);
+    document.getElementById('vip').innerHTML = vip.length
+      ? vip.map(c=>`<div class="row"><span class="nm">${esc(c.name)}</span>`+
+        `<span class="meta">${c.count} replies</span></div>`).join('')
+      : '<div class="empty">no activity yet</div>';
+    const hrs=d.trends.by_hour||[], mx=Math.max(1,...hrs);
+    document.getElementById('bars').innerHTML = hrs.map(h=>
+      `<div class="bar" style="height:${Math.round(100*h/mx)}%" title="${h}"></div>`).join('');
+    // services
+    let html='';
+    for(const s of d.services){
+      let cls='down', meta='not running';
+      if(s.alive){
+        if(s.scheduled){ cls='up'; meta='scheduled · loaded'; }
+        else if(s.heartbeat){ cls = s.fresh?'up':'stale';
+          meta = `pid ${s.pid} · ❤ ${s.heartbeat}${s.mins_ago!=null?` (${s.mins_ago}m ago)`:''}`;
+        } else { cls='up'; meta=`pid ${s.pid}`; }
+      }
+      html += `<div class="row"><span class="pill ${cls}"></span>`+
+              `<span class="nm">${esc(s.name)}</span>`+
+              `<span class="meta">${esc(meta)}</span></div>`;
+    }
+    document.getElementById('svc').innerHTML = html;
+    renderQueue(d);
+    // approvals — actions waiting for a tap
+    const ap=d.approvals||[];
+    if(ap.length){
+      document.getElementById('approvalsCard').style.display='block';
+      document.getElementById('approvals').innerHTML=ap.slice().reverse().map(a=>{
+        const icon={text:'💬',email:'✉️',event:'📅'}[a.kind]||'•';
+        return `<div class="mi"><div class="mtxt"><div class="mwho">${icon} ${esc(a.summary)}</div>`+
+          `<div class="mmeta">${esc(a.source)} · ${esc((a.created||'').slice(5,16).replace('T',' '))}</div></div>`+
+          `<button class="go" onclick='approve(${JSON.stringify(a.id)},"approve")'>Approve</button>`+
+          `<button onclick='approve(${JSON.stringify(a.id)},"reject")'>✕</button></div>`;
+      }).join('');
+    } else { document.getElementById('approvalsCard').style.display='none'; }
+    // priority — what needs you now (due commitments + follow-ups)
+    const pr=d.priority||{due_today:[],followups:[]};
+    const pitems=[]
+      .concat((pr.due_today||[]).map(c=>({txt:`🔴 ${c.text}`+(c.who?` (${c.who})`:'') ,sub:c.due?('due '+c.due):'due'})))
+      .concat((pr.followups||[]).map(f=>({txt:`🟠 ${f.who}`,sub:f.summary})));
+    if(pitems.length){
+      document.getElementById('priorityCard').style.display='block';
+      document.getElementById('priority').innerHTML=pitems.slice(0,6).map(p=>
+        `<div class="mi"><div class="mtxt"><div class="mwho">${esc(p.txt)}</div>`+
+        `<div class="mmeta">${esc(p.sub)}</div></div></div>`).join('');
+    } else { document.getElementById('priorityCard').style.display='none'; }
+    // finance + upcoming + backup stats
+    document.getElementById('spend').textContent='$'+((d.finance&&d.finance.total)||0).toFixed(0);
+    document.getElementById('upcomingN').textContent=(d.upcoming||[]).length;
+    document.getElementById('backupWhen').textContent=(d.backup&&d.backup.latest_when)||'never';
+    const up=d.upcoming||[];
+    document.getElementById('upcoming').innerHTML = up.length
+      ? up.map(x=>`<div class="row"><span class="nm">${x.type==='travel'?'✈️':'📦'} ${esc(x.summary)}</span>`+
+          `<span class="meta">${esc(x.when||'')}</span></div>`).join('')
+      : '<div class="empty">nothing incoming</div>';
+    const fin=(d.finance&&d.finance.recent)||[];
+    const cats=(d.finance&&d.finance.categories)||[];
+    document.getElementById('spendList').innerHTML = fin.length
+      ? `<div class="muted" style="padding:4px 0">$${(d.finance.total||0).toFixed(2)} across ${d.finance.count} charges</div>`+
+        (cats.length?`<div style="margin:4px 0 8px">`+cats.map(c=>`<span class="tag" style="display:inline-block;background:#1c2735;border-radius:8px;padding:3px 8px;margin:2px;font-size:12px">${esc(c.name)} $${c.amount.toFixed(0)}</span>`).join('')+`</div>`:'')+
+        fin.map(x=>`<div class="row"><span class="nm">${esc(x.merchant)} <span class="muted">${esc(x.category||'')}</span></span>`+
+          `<span class="meta">$${(x.amount||0).toFixed(2)} · ${esc(x.date)}</span></div>`).join('')
+      : '<div class="empty">no transactions tracked yet</div>';
+    document.getElementById('backupInfo').textContent =
+      (d.backup&&d.backup.count) ? `${d.backup.count} backups · latest ${d.backup.latest_when}` : 'no backups yet';
+    // tasks
+    LAST_TASKS=d.tasks||[];
+    document.getElementById('tasks').innerHTML = (d.tasks&&d.tasks.length)
+      ? d.tasks.slice().reverse().map(t=>{
+          const due=t.due?`<span class="due">${esc(t.due)}</span>`:'';
+          return `<div class="mi"><div class="mtxt"><div class="mwho">${esc(t.text)} ${due}</div>`+
+            (t.who?`<div class="mmeta">from ${esc(t.who)}</div>`:'')+`</div>`+
+            `<button class="go" onclick='completeTask(${JSON.stringify(t.id)})'>Done</button></div>`;
+        }).join('')
+      : '<div class="empty">no open tasks</div>';
+    // decisions
+    document.getElementById('decisions').innerHTML = (d.decisions&&d.decisions.length)
+      ? d.decisions.map(x=>`<div class="ev"><span class="t">${esc((x.when||'').slice(5,16).replace('T',' '))}</span> ${esc(x.text)}</div>`).join('')
+      : '<div class="empty">no decisions logged</div>';
+    LAST_DEALS=d.deals||[];
+    document.getElementById('dealsN')&&(document.getElementById('dealsN').textContent=(d.deals||[]).filter(x=>x.stage!=='won'&&x.stage!=='lost').length);
+    if(document.querySelector('details[ontoggle*=renderDeals]')&&document.querySelector('details[ontoggle*=renderDeals]').open) renderDeals();
+    LAST_WF=d.workflows||[];
+    if(document.querySelector('details[ontoggle*=renderWorkflows]')&&document.querySelector('details[ontoggle*=renderWorkflows]').open) renderWorkflows();
+    renderContacts(d.contacts);
+    document.getElementById('imsgList').innerHTML  = evList(d.imessage.recent);
+    document.getElementById('emailList').innerHTML = evList(d.email.recent);
+    const p=document.getElementById('pulse'); p.style.color='#2ee6a0';
+    setTimeout(()=>p.style.color='#1f2a38',400);
+  }catch(e){ document.getElementById('clock').textContent='connection lost — retrying…'; }
+}
+load();
+loadNotify();
+setInterval(load, 10000);
+setInterval(()=>{  // live-tick the queue countdowns between full refreshes
+  document.querySelectorAll('.qc').forEach(el=>{});
+}, 1000);
+</script>
+<div style="position:fixed;top:0;left:0;right:0;background:#2ee6a0;color:#06281c;text-align:center;padding:7px;font-weight:800;font-size:13px;z-index:99999;letter-spacing:.3px">LANA &nbsp;—&nbsp; your AI Chief of Staff &nbsp;·&nbsp; LIVE DEMO (sample data)</div><script>document.addEventListener("DOMContentLoaded",function(){document.body.style.paddingTop="36px";});</script></body>
+</html>
