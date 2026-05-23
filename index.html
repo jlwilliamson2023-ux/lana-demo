@@ -11,8 +11,8 @@
 <meta name="theme-color" content="#0a0e14">
 <link rel="apple-touch-icon" href="/icon.png">
 <style>
-  :root{ --bg:#0a0e14; --card:#131a24; --line:#1f2a38; --txt:#e6edf3;
-         --dim:#8b98a8; --ok:#2ee6a0; --bad:#ff5d5d; --warn:#ffc857; --accent:#5b9dff; }
+  :root{ --bg:#000000; --card:#0a0a0a; --line:#1f1f1f; --txt:#ffffff;
+         --dim:#7a7a7a; --ok:#44D62C; --bad:#ff3838; --warn:#ffb800; --accent:#44D62C; }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   body{margin:0;background:var(--bg);color:var(--txt);
        font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
@@ -23,24 +23,24 @@
   .clock{color:var(--dim);font-size:13px;margin-bottom:18px}
   /* health ring used inside the hero */
   .ring{width:84px;height:84px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;position:relative}
-  .ring::after{content:"";position:absolute;inset:9px;border-radius:50%;background:#10171f}
+  .ring::after{content:"";position:absolute;inset:9px;border-radius:50%;background:#0a0a0a}
   .ring span{position:relative;z-index:1;font-size:21px;font-weight:700}
   .mlabel{font-size:18px;font-weight:700;letter-spacing:-.2px}
   .msub{color:var(--dim);font-size:13px;margin-top:3px}
 
   /* stat tiles */
   .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
-  .stat{position:relative;background:linear-gradient(180deg,#171f29 0%,#0f161e 100%);
+  .stat{position:relative;background:linear-gradient(180deg,#0c0c0c 0%,#050505 100%);
         border:1px solid var(--line);border-radius:14px;padding:14px 16px;overflow:hidden;
         box-shadow:0 2px 10px rgba(0,0,0,.22), inset 0 1px 0 #ffffff05;
         transition:transform .15s ease, border-color .15s ease}
-  .stat:hover{transform:translateY(-1px);border-color:#2a3a4d}
+  .stat:hover{transform:translateY(-1px);border-color:#2a2a2a}
   .stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--ok);opacity:.55}
   .stat .n{font-size:24px;font-weight:700;letter-spacing:-.4px}
   .stat .l{color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:1.1px;margin-top:3px}
 
   /* cards */
-  .card{background:linear-gradient(180deg,#161d28 0%,#0f161e 100%);
+  .card{background:linear-gradient(180deg,#0c0c0c 0%,#050505 100%);
         border:1px solid var(--line);border-radius:16px;padding:14px 18px;margin-bottom:14px;
         box-shadow:0 4px 16px rgba(0,0,0,.25), inset 0 1px 0 #ffffff06}
   .ctrl{padding:16px 18px}
@@ -49,19 +49,19 @@
 
   /* buttons */
   .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  button{background:linear-gradient(180deg,#212c39 0%,#171f29 100%);color:var(--txt);
+  button{background:linear-gradient(180deg,#1a1a1a 0%,#0c0c0c 100%);color:var(--txt);
          border:1px solid var(--line);border-radius:11px;padding:9px 14px;font-size:13px;
          font-weight:600;cursor:pointer;letter-spacing:.2px;
          transition:transform .12s ease, filter .12s ease, border-color .12s ease;
          box-shadow:inset 0 1px 0 #ffffff07}
-  button:hover{filter:brightness(1.12);transform:translateY(-1px);border-color:#2a3a4d}
+  button:hover{filter:brightness(1.12);transform:translateY(-1px);border-color:#2a2a2a}
   button:active{transform:translateY(0) scale(.98)}
-  button.go{background:linear-gradient(180deg,#2ee6a0 0%,#22b87f 100%);color:#06281c;border-color:#22b87f;font-weight:700}
+  button.go{background:linear-gradient(180deg,#44D62C 0%,#2a8a1a 100%);color:#002400;border-color:#2a8a1a;font-weight:700}
   button.warn{background:linear-gradient(180deg,#ffd680 0%,#e6b860 100%);color:#3a2a00;border-color:#e6b860;font-weight:700}
   button.danger{background:linear-gradient(180deg,#ff7a7a 0%,#e85a5a 100%);color:#3a0000;border-color:#e85a5a;font-weight:700}
 
   /* rows / lists */
-  .row{display:flex;align-items:center;padding:11px 0;border-bottom:1px solid #1a2330;transition:background .12s ease}
+  .row{display:flex;align-items:center;padding:11px 0;border-bottom:1px solid #1a1a1a;transition:background .12s ease}
   .row:hover{background:#ffffff03}
   .row:last-child{border-bottom:none}
   .pill{width:10px;height:10px;border-radius:50%;margin-right:12px;flex:0 0 auto}
@@ -76,10 +76,10 @@
      margin:24px 0 10px 6px;font-weight:600}
 
   /* event lines + email queue */
-  .ev{padding:10px 0;border-bottom:1px solid #1a2330;font-size:14px}
+  .ev{padding:10px 0;border-bottom:1px solid #1a1a1a;font-size:14px}
   .ev:last-child{border-bottom:none}
-  .ev .t{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:8px;font-size:12px}
-  .qitem{padding:12px 0;border-bottom:1px solid #1a2330}
+  .ev .t{color:var(--dim);font-variant-numeric:tabular-nums;margin-right:8px;font-size:12px}
+  .qitem{padding:12px 0;border-bottom:1px solid #1a1a1a}
   .qitem:last-child{border-bottom:none}
   .qitem .qh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
   .qitem .qn{font-weight:600}
@@ -92,7 +92,7 @@
   .refresh{color:var(--accent);font-size:12px}
 
   /* memory items */
-  .mi{padding:11px 0;border-bottom:1px solid #1a2330;display:flex;gap:10px;align-items:flex-start;transition:background .12s ease}
+  .mi{padding:11px 0;border-bottom:1px solid #1a1a1a;display:flex;gap:10px;align-items:flex-start;transition:background .12s ease}
   .mi:hover{background:#ffffff03}
   .mi:last-child{border-bottom:none}
   .mi .mtxt{flex:1}
@@ -103,32 +103,32 @@
 
   /* pill toggles */
   .tog{display:inline-flex;align-items:center;gap:8px;
-       background:linear-gradient(180deg,#212c39,#171f29);
+       background:linear-gradient(180deg,#1a1a1a,#0c0c0c);
        border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:13px;
        font-weight:600;cursor:pointer;transition:filter .12s ease, border-color .12s ease;
        box-shadow:inset 0 1px 0 #ffffff07}
-  .tog:hover{filter:brightness(1.12);border-color:#2a3a4d}
+  .tog:hover{filter:brightness(1.12);border-color:#2a2a2a}
   .tog .led{width:9px;height:9px;border-radius:50%}
   .tog .on{background:var(--ok);box-shadow:0 0 8px var(--ok)}
   .tog .off{background:var(--bad)}
 
   /* fields */
-  input,select,textarea{width:100%;background:#0c1219;color:var(--txt);
+  input,select,textarea{width:100%;background:#050505;color:var(--txt);
        border:1px solid var(--line);border-radius:11px;padding:11px 13px;font-size:14px;
        font-family:inherit;margin:5px 0;
        transition:border-color .12s ease, box-shadow .12s ease, background .12s ease}
   input::placeholder,textarea::placeholder{color:#5a6878}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ok);
-       box-shadow:0 0 0 3px #2ee6a01a;background:#0e151d}
+       box-shadow:0 0 0 3px #44D62C1a;background:#0a0a0a}
   textarea{min-height:78px;resize:vertical;line-height:1.5}
   .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
   /* collapsible sections */
-  details{background:linear-gradient(180deg,#161d28 0%,#0f161e 100%);
+  details{background:linear-gradient(180deg,#0c0c0c 0%,#050505 100%);
           border:1px solid var(--line);border-radius:14px;padding:0 18px;margin-bottom:12px;
           box-shadow:0 2px 10px rgba(0,0,0,.2), inset 0 1px 0 #ffffff06;
           transition:border-color .15s ease}
-  details[open]{border-color:#2a3a4d}
+  details[open]{border-color:#2a2a2a}
   summary{cursor:pointer;font-weight:600;font-size:14px;padding:14px 0;list-style:none;
           display:flex;align-items:center;justify-content:space-between;color:var(--txt);
           letter-spacing:.1px}
@@ -139,22 +139,22 @@
 
   /* bars (trends) */
   .bars{display:flex;align-items:flex-end;gap:3px;height:60px;margin:10px 0}
-  .bar{flex:1;background:linear-gradient(180deg,var(--ok) 0%,#22b87f 100%);
+  .bar{flex:1;background:linear-gradient(180deg,var(--ok) 0%,#2a8a1a 100%);
        border-radius:3px 3px 0 0;min-height:2px;opacity:.9;transition:opacity .15s ease}
   .bar:hover{opacity:1}
 
   .ok{color:var(--ok)} .muted{color:var(--dim);font-size:12px}
   /* Hero: brand + live stats + animated system visualization */
-  body{background:radial-gradient(1200px 600px at -10% -20%, #131a2455, transparent 60%),
-                  radial-gradient(900px 500px at 110% 10%, #2ee6a012, transparent 55%),
-                  var(--bg)}
+  body{background:radial-gradient(1100px 500px at 110% -10%, #44D62C12, transparent 55%),
+                  radial-gradient(900px 600px at -10% 110%, #44D62C08, transparent 50%),
+                  #000000}
   .hero{display:flex;gap:22px;align-items:center;justify-content:space-between;
-        background:linear-gradient(135deg,#161d28 0%,#0e151e 100%);
-        border:1px solid var(--line);border-radius:18px;padding:22px;margin:0 0 18px;
+        background:linear-gradient(135deg,#0a0a0a 0%,#000000 100%);
+        border:1px solid #1f1f1f;border-radius:18px;padding:22px;margin:0 0 18px;
         position:relative;overflow:hidden;flex-wrap:wrap;
-        box-shadow:0 8px 32px rgba(0,0,0,.35), inset 0 1px 0 #ffffff08}
-  .hero::before{content:"";position:absolute;left:-20%;top:-50%;width:60%;height:200%;
-        background:radial-gradient(ellipse at center, #2ee6a022 0%, transparent 60%);
+        box-shadow:0 8px 32px rgba(0,0,0,.6), inset 0 1px 0 #44D62C18}
+  .hero::before{content:"";position:absolute;left:-20%;top:-50%;width:65%;height:200%;
+        background:radial-gradient(ellipse at center, #44D62C2a 0%, transparent 60%);
         pointer-events:none}
   .hero-left{flex:1;min-width:240px;position:relative;z-index:1}
   .hero-left h1{font-size:44px;letter-spacing:2px;margin:0;font-weight:800;line-height:1}
@@ -184,27 +184,27 @@
     <svg class="hero-svg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-label="LANA system">
       <defs>
         <radialGradient id="lanaGlow" cx="50%" cy="50%">
-          <stop offset="0%" stop-color="#2ee6a0" stop-opacity=".35"/>
-          <stop offset="70%" stop-color="#2ee6a0" stop-opacity="0"/>
+          <stop offset="0%" stop-color="#44D62C" stop-opacity=".35"/>
+          <stop offset="70%" stop-color="#44D62C" stop-opacity="0"/>
         </radialGradient>
       </defs>
       <circle cx="120" cy="120" r="110" fill="url(#lanaGlow)"/>
       <circle cx="120" cy="120" r="92" fill="none" stroke="#1f2a38" stroke-width="1" stroke-dasharray="2 4"/>
-      <circle cx="120" cy="120" r="34" fill="none" stroke="#2ee6a0" stroke-width="1.2" opacity=".55"><animate attributeName="r" values="34;100" dur="3.6s" repeatCount="indefinite"/><animate attributeName="opacity" values=".55;0" dur="3.6s" repeatCount="indefinite"/></circle>
-      <circle cx="120" cy="120" r="34" fill="none" stroke="#2ee6a0" stroke-width="1.2" opacity=".55"><animate attributeName="r" values="34;100" dur="3.6s" begin="1.2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".55;0" dur="3.6s" begin="1.2s" repeatCount="indefinite"/></circle>
-      <circle cx="120" cy="120" r="34" fill="none" stroke="#2ee6a0" stroke-width="1.2" opacity=".55"><animate attributeName="r" values="34;100" dur="3.6s" begin="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".55;0" dur="3.6s" begin="2.4s" repeatCount="indefinite"/></circle>
+      <circle cx="120" cy="120" r="34" fill="none" stroke="#44D62C" stroke-width="1.2" opacity=".55"><animate attributeName="r" values="34;100" dur="3.6s" repeatCount="indefinite"/><animate attributeName="opacity" values=".55;0" dur="3.6s" repeatCount="indefinite"/></circle>
+      <circle cx="120" cy="120" r="34" fill="none" stroke="#44D62C" stroke-width="1.2" opacity=".55"><animate attributeName="r" values="34;100" dur="3.6s" begin="1.2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".55;0" dur="3.6s" begin="1.2s" repeatCount="indefinite"/></circle>
+      <circle cx="120" cy="120" r="34" fill="none" stroke="#44D62C" stroke-width="1.2" opacity=".55"><animate attributeName="r" values="34;100" dur="3.6s" begin="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".55;0" dur="3.6s" begin="2.4s" repeatCount="indefinite"/></circle>
       <g font-family="-apple-system,sans-serif" font-size="8" fill="#8b98a8">
-        <g><circle cx="120" cy="28" r="3.5" fill="#2ee6a0"/><text x="120" y="18" text-anchor="middle">iMessage</text></g>
-        <g><circle cx="212" cy="120" r="3.5" fill="#2ee6a0"/><text x="218" y="123">Email</text></g>
-        <g><circle cx="120" cy="212" r="3.5" fill="#2ee6a0"/><text x="120" y="226" text-anchor="middle">Agent</text></g>
-        <g><circle cx="28" cy="120" r="3.5" fill="#2ee6a0"/><text x="22" y="123" text-anchor="end">Voice</text></g>
-        <g><circle cx="186" cy="54" r="2.5" fill="#a78bfa"/><text x="192" y="50">Calendar</text></g>
-        <g><circle cx="54" cy="186" r="2.5" fill="#a78bfa"/><text x="48" y="200" text-anchor="end">Tasks</text></g>
-        <g><circle cx="54" cy="54" r="2.5" fill="#a78bfa"/><text x="48" y="48" text-anchor="end">Memory</text></g>
-        <g><circle cx="186" cy="186" r="2.5" fill="#a78bfa"/><text x="192" y="200">Deals</text></g>
+        <g><circle cx="120" cy="28" r="3.5" fill="#44D62C"/><text x="120" y="18" text-anchor="middle">iMessage</text></g>
+        <g><circle cx="212" cy="120" r="3.5" fill="#44D62C"/><text x="218" y="123">Email</text></g>
+        <g><circle cx="120" cy="212" r="3.5" fill="#44D62C"/><text x="120" y="226" text-anchor="middle">Agent</text></g>
+        <g><circle cx="28" cy="120" r="3.5" fill="#44D62C"/><text x="22" y="123" text-anchor="end">Voice</text></g>
+        <g><circle cx="186" cy="54" r="2.5" fill="#2a8a1a"/><text x="192" y="50">Calendar</text></g>
+        <g><circle cx="54" cy="186" r="2.5" fill="#2a8a1a"/><text x="48" y="200" text-anchor="end">Tasks</text></g>
+        <g><circle cx="54" cy="54" r="2.5" fill="#2a8a1a"/><text x="48" y="48" text-anchor="end">Memory</text></g>
+        <g><circle cx="186" cy="186" r="2.5" fill="#2a8a1a"/><text x="192" y="200">Deals</text></g>
       </g>
-      <circle cx="120" cy="120" r="24" fill="#2ee6a0"><animate attributeName="r" values="22;26;22" dur="2.4s" repeatCount="indefinite"/></circle>
-      <text x="120" y="124" text-anchor="middle" fill="#06281c" font-size="11" font-weight="900" font-family="-apple-system,sans-serif">LANA</text>
+      <circle cx="120" cy="120" r="24" fill="#44D62C"><animate attributeName="r" values="22;26;22" dur="2.4s" repeatCount="indefinite"/></circle>
+      <text x="120" y="124" text-anchor="middle" fill="#002400" font-size="11" font-weight="900" font-family="-apple-system,sans-serif">LANA</text>
     </svg>
   </div>
 
@@ -694,7 +694,7 @@ async function openThread(id,name){
     v.innerHTML=`<div class="card" style="margin-top:8px"><div style="font-weight:700;padding:8px 0">${esc(name)}</div>`+
       m.map(x=>`<div style="text-align:${x.me?'right':'left'};margin:5px 0">`+
         `<span style="display:inline-block;max-width:80%;padding:7px 11px;border-radius:12px;`+
-        `background:${x.me?'#14402f':'#1c2735'}">${esc(x.text)}</span>`+
+        `background:${x.me?'#14402f':'#1a1a1a'}">${esc(x.text)}</span>`+
         `<div class="muted" style="font-size:10px">${esc(x.when)}</div></div>`).join('')+`</div>`;
   }catch(e){ v.innerHTML='<div class="empty">couldn\'t load</div>'; }
 }
@@ -890,7 +890,7 @@ async function load(){
     document.getElementById('emails').textContent = d.email.replies_today;
     document.getElementById('cost').textContent   = '$'+(d.cost?d.cost.cost:0).toFixed(2);
     // health ring
-    const h=d.health, col = h.state==='good'?'#2ee6a0':(h.state==='warn'?'#ffc857':'#ff5d5d');
+    const h=d.health, col = h.state==='good'?'#44D62C':(h.state==='warn'?'#ffc857':'#ff5d5d');
     const ring=document.getElementById('ring');
     ring.style.background=`conic-gradient(${col} ${h.score}%, #1f2a38 0)`;
     document.getElementById('ringPct').textContent=h.score+'%';
@@ -901,7 +901,7 @@ async function load(){
     // control state
     document.getElementById('ctrlState').textContent=d.control.state;
     document.getElementById('ctrlState').style.color=
-      d.control.state==='active'||d.control.state.startsWith('active')?'#2ee6a0':'#ffc857';
+      d.control.state==='active'||d.control.state.startsWith('active')?'#44D62C':'#ffc857';
     QUIET=d.control.quiet_enabled; QS=d.control.quiet_start; QE=d.control.quiet_end;
     document.getElementById('quietBtn').textContent=
       `Quiet hours: ${QUIET?'ON':'OFF'} (${String(QS).padStart(2,'0')}–${String(QE).padStart(2,'0')})`;
@@ -972,7 +972,7 @@ async function load(){
     const cats=(d.finance&&d.finance.categories)||[];
     document.getElementById('spendList').innerHTML = fin.length
       ? `<div class="muted" style="padding:4px 0">$${(d.finance.total||0).toFixed(2)} across ${d.finance.count} charges</div>`+
-        (cats.length?`<div style="margin:4px 0 8px">`+cats.map(c=>`<span class="tag" style="display:inline-block;background:#1c2735;border-radius:8px;padding:3px 8px;margin:2px;font-size:12px">${esc(c.name)} $${c.amount.toFixed(0)}</span>`).join('')+`</div>`:'')+
+        (cats.length?`<div style="margin:4px 0 8px">`+cats.map(c=>`<span class="tag" style="display:inline-block;background:#1a1a1a;border-radius:8px;padding:3px 8px;margin:2px;font-size:12px">${esc(c.name)} $${c.amount.toFixed(0)}</span>`).join('')+`</div>`:'')+
         fin.map(x=>`<div class="row"><span class="nm">${esc(x.merchant)} <span class="muted">${esc(x.category||'')}</span></span>`+
           `<span class="meta">$${(x.amount||0).toFixed(2)} · ${esc(x.date)}</span></div>`).join('')
       : '<div class="empty">no transactions tracked yet</div>';
@@ -1003,7 +1003,7 @@ async function load(){
     renderContacts(d.contacts);
     document.getElementById('imsgList').innerHTML  = evList(d.imessage.recent);
     document.getElementById('emailList').innerHTML = evList(d.email.recent);
-    const p=document.getElementById('pulse'); if(p) p.style.color='#2ee6a0';
+    const p=document.getElementById('pulse'); if(p) p.style.color='#44D62C';
     setTimeout(()=>p.style.color='#1f2a38',400);
   }catch(e){ const h=document.getElementById('heroStat'); if(h) h.textContent='connection lost — retrying…'; }
 }
