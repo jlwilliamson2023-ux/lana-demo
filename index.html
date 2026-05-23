@@ -186,9 +186,8 @@
                         radial-gradient(900px 600px at -10% 110%, #44D62C08, transparent 50%)}
   /* American flag + soldiers photo behind the dark overlay (public domain, DVIDS) */
   body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
-    background-image:linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.35)),
-                     url("dashboard_bg.jpg");
-    background-size:cover, cover;background-position:center;
+    background-image:url("dashboard_bg.jpg");
+    background-size:cover;background-position:center;
     background-repeat:no-repeat;background-attachment:fixed}
   .hero{display:flex;gap:22px;align-items:center;justify-content:space-between;
         background:linear-gradient(135deg,var(--card) 0%,var(--bg) 100%);
