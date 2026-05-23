@@ -167,10 +167,22 @@
     box-shadow:0 2px 8px rgba(0,0,0,.4)}
   .preset:hover{transform:scale(1.12);border-color:#fff}
   .preset.active{border-color:#fff;transform:scale(1.12)}
+  .theme-tabs{display:flex;gap:6px;margin:0 auto 12px;max-width:260px}
+  .theme-tabs .tab{flex:1;padding:9px;border-radius:9px;background:#0c0c0c;
+    border:1px solid #1f1f1f;cursor:pointer;font-size:12px;font-weight:700;color:var(--dim);
+    text-align:center;letter-spacing:.5px;transition:all .15s}
+  .theme-tabs .tab.active{background:var(--ok);color:#000;border-color:var(--ok);
+    box-shadow:0 0 14px #44D62C55}
+  .theme-label{font-size:13px;font-weight:700;letter-spacing:.4px;color:var(--txt);
+    margin:6px 0 2px;text-align:center;text-transform:uppercase;opacity:.85}
+  .theme-divider{height:1px;background:linear-gradient(90deg,transparent,#1f1f1f,transparent);
+    margin:18px 0 10px}
+  .theme-wheel-sm{width:180px;height:180px}
+  .theme-wheel-sm canvas{width:180px;height:180px}
   /* Hero: brand + live stats + animated system visualization */
-  body{background:radial-gradient(1100px 500px at 110% -10%, #44D62C12, transparent 55%),
-                  radial-gradient(900px 600px at -10% 110%, #44D62C08, transparent 50%),
-                  #000000}
+  body{background-color:var(--bg);
+       background-image:radial-gradient(1100px 500px at 110% -10%, #44D62C12, transparent 55%),
+                        radial-gradient(900px 600px at -10% 110%, #44D62C08, transparent 50%)}
   .hero{display:flex;gap:22px;align-items:center;justify-content:space-between;
         background:linear-gradient(135deg,#0a0a0a 0%,#000000 100%);
         border:1px solid #1f1f1f;border-radius:18px;padding:22px;margin:0 0 18px;
@@ -231,11 +243,13 @@
     </svg>
   </div>
 
-  <!-- theme picker: change the accent color (Govee-style) -->
+  <!-- theme picker: change accent + background (Govee-style) -->
   <details ontoggle="if(this.open)initThemePicker()">
     <summary>🎨 Theme</summary>
     <div style="padding:0 0 14px">
-      <div class="muted" style="margin-bottom:6px;text-align:center">Tap or drag the wheel · saves automatically</div>
+      <div class="muted" style="margin-bottom:6px;text-align:center">Tap or drag · saves automatically</div>
+
+      <div class="theme-label">Accent color</div>
       <div class="theme-wheel" id="themeWheelBox">
         <canvas id="themeWheel" width="220" height="220"></canvas>
         <div class="pointer" id="themePointer"></div>
@@ -248,9 +262,28 @@
       <div class="theme-row">
         <input class="theme-hex" id="themeHex" maxlength="7" placeholder="#44D62C">
         <button class="go" onclick="applyHex()">Apply</button>
-        <button onclick="resetTheme()">Razer</button>
+        <button onclick="resetTheme()">Default</button>
       </div>
       <div class="theme-presets" id="themePresets"></div>
+
+      <div class="theme-divider"></div>
+
+      <div class="theme-label">Background color</div>
+      <div class="theme-wheel theme-wheel-sm" id="bgWheelBox">
+        <canvas id="bgWheel" width="180" height="180"></canvas>
+        <div class="pointer" id="bgPointer"></div>
+      </div>
+      <div class="theme-row">
+        <span class="muted" style="font-size:11px;width:32px">darker</span>
+        <input type="range" min="0" max="40" value="0" class="theme-light" id="bgLight">
+        <span class="muted" style="font-size:11px;width:38px">lighter</span>
+      </div>
+      <div class="theme-row">
+        <input class="theme-hex" id="bgHex" maxlength="7" placeholder="#000000">
+        <button class="go" onclick="applyBgHex()">Apply</button>
+        <button onclick="resetBg()">Black</button>
+      </div>
+      <div class="theme-presets" id="bgPresets"></div>
     </div>
   </details>
 
@@ -573,7 +606,7 @@ function resolveMem(kind,id){ post('/memory-action',{kind,id}); }
 
 // Theme picker (Govee-style)
 const THEME_PRESETS=[
-  ['Razer','#44D62C'],['Cyan','#00D4FF'],['Pink','#FF2E88'],['Orange','#FF8C42'],
+  ['Green','#44D62C'],['Cyan','#00D4FF'],['Pink','#FF2E88'],['Orange','#FF8C42'],
   ['Yellow','#FFEE00'],['Purple','#A78BFA'],['Ice','#B5D3FF'],['White','#FFFFFF']
 ];
 let CURRENT_ACCENT='#44D62C';
@@ -664,11 +697,101 @@ function initThemePicker(){
     p.classList.toggle('active', p.dataset.hex && p.dataset.hex.toUpperCase()===CURRENT_ACCENT);
   });
 }
-// Load saved accent on page boot (runs before SVG queries pick up #44D62C — ok, SVG just loaded)
+// Background picker (second wheel — controls --bg)
+const BG_PRESETS=[
+  ['Black','#000000'],['Charcoal','#0a0a0a'],['Slate','#0d1117'],['Navy','#050a14'],
+  ['Forest','#03100A'],['Wine','#0F0405'],['Cosmos','#0a0512'],['Off-Black','#141414']
+];
+function drawBgWheel(){
+  const cv=document.getElementById('bgWheel'); if(!cv) return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height,r=W/2;
+  const L=parseInt(document.getElementById('bgLight').value,10);
+  const img=ctx.createImageData(W,H);
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+    const dx=x-r,dy=y-r,dist=Math.sqrt(dx*dx+dy*dy),i=(y*W+x)*4;
+    if(dist>r){img.data[i+3]=0;continue;}
+    const sat=(dist/r)*100;
+    let hue=Math.atan2(dy,dx)*180/Math.PI; if(hue<0)hue+=360;
+    const hex=hslToHex(hue,sat,L);
+    img.data[i]=parseInt(hex.substr(1,2),16);
+    img.data[i+1]=parseInt(hex.substr(3,2),16);
+    img.data[i+2]=parseInt(hex.substr(5,2),16);
+    img.data[i+3]=255;
+  }
+  ctx.putImageData(img,0,0);
+}
+function applyBg(hex){
+  if(!hex||!/^#[0-9A-Fa-f]{6}$/.test(hex)) return;
+  hex=hex.toUpperCase();
+  document.documentElement.style.setProperty('--bg',hex);
+  document.body.style.backgroundColor=hex;
+  // Re-apply accent glow on top of the new bg
+  document.body.style.backgroundImage =
+    'radial-gradient(1100px 500px at 110% -10%, '+CURRENT_ACCENT+'1f, transparent 55%),'+
+    'radial-gradient(900px 600px at -10% 110%, '+CURRENT_ACCENT+'10, transparent 50%)';
+  // Auto-flip text color on light backgrounds so it stays readable
+  const r=parseInt(hex.substr(1,2),16)/255, g=parseInt(hex.substr(3,2),16)/255, b=parseInt(hex.substr(5,2),16)/255;
+  const isLight = (0.299*r + 0.587*g + 0.114*b) > 0.55;
+  document.documentElement.style.setProperty('--txt', isLight ? '#0a0a0a' : '#ffffff');
+  document.documentElement.style.setProperty('--dim', isLight ? '#5a5a5a' : '#7a7a7a');
+  const hexInput=document.getElementById('bgHex'); if(hexInput) hexInput.value=hex;
+  try{ localStorage.setItem('lanaBg',hex); }catch(e){}
+  document.querySelectorAll('#bgPresets .preset').forEach(p=>{
+    p.classList.toggle('active', p.dataset.hex && p.dataset.hex.toUpperCase()===hex);
+  });
+}
+function applyBgHex(){ applyBg(document.getElementById('bgHex').value); }
+function resetBg(){
+  applyBg('#000000');
+  const s=document.getElementById('bgLight'); if(s){s.value=0; drawBgWheel();}
+}
+function pickFromBgWheel(ev){
+  const cv=document.getElementById('bgWheel'); if(!cv) return;
+  const rect=cv.getBoundingClientRect();
+  const cx=ev.touches?ev.touches[0].clientX:ev.clientX;
+  const cy=ev.touches?ev.touches[0].clientY:ev.clientY;
+  const x=cx-rect.left, y=cy-rect.top, r=cv.width/2;
+  const dx=x-r, dy=y-r, dist=Math.sqrt(dx*dx+dy*dy);
+  if(dist>r) return;
+  const sat=(dist/r)*100;
+  let hue=Math.atan2(dy,dx)*180/Math.PI; if(hue<0)hue+=360;
+  const L=parseInt(document.getElementById('bgLight').value,10);
+  applyBg(hslToHex(hue,sat,L));
+  const p=document.getElementById('bgPointer');
+  if(p){ p.style.left=x+'px'; p.style.top=y+'px'; }
+}
+
+// Extend initThemePicker to also wire the bg picker
+const _origInit = initThemePicker;
+initThemePicker = function(){
+  _origInit();
+  const cv=document.getElementById('bgWheel'); if(!cv || cv.dataset.init) return;
+  cv.dataset.init='1';
+  document.getElementById('bgPresets').innerHTML = BG_PRESETS.map(p=>
+    '<button class="preset" data-hex="'+p[1]+'" style="background:'+p[1]+'" onclick="applyBg(\''+p[1]+'\')" title="'+p[0]+'"></button>'
+  ).join('');
+  document.getElementById('bgLight').addEventListener('input', drawBgWheel);
+  let dragging=false;
+  cv.addEventListener('mousedown', e=>{dragging=true; pickFromBgWheel(e);});
+  cv.addEventListener('mousemove', e=>{ if(dragging) pickFromBgWheel(e); });
+  document.addEventListener('mouseup', ()=>dragging=false);
+  cv.addEventListener('touchstart', e=>{pickFromBgWheel(e); e.preventDefault();},{passive:false});
+  cv.addEventListener('touchmove', e=>{pickFromBgWheel(e); e.preventDefault();},{passive:false});
+  drawBgWheel();
+  const cur = (localStorage.getItem('lanaBg')||'#000000').toUpperCase();
+  const hexInput=document.getElementById('bgHex'); if(hexInput) hexInput.value=cur;
+  document.querySelectorAll('#bgPresets .preset').forEach(p=>{
+    p.classList.toggle('active', p.dataset.hex && p.dataset.hex.toUpperCase()===cur);
+  });
+};
+
+// Load saved theme on page boot
 (function(){
   try{
-    const saved=localStorage.getItem('lanaAccent');
-    if(saved) setTimeout(()=>applyAccent(saved), 0);
+    const sa=localStorage.getItem('lanaAccent');
+    if(sa) setTimeout(()=>applyAccent(sa), 0);
+    const sb=localStorage.getItem('lanaBg');
+    if(sb) setTimeout(()=>applyBg(sb), 0);
   }catch(e){}
 })();
 
