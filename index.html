@@ -276,7 +276,7 @@
       </div>
       <div class="theme-row">
         <span class="muted" style="font-size:11px;width:32px">darker</span>
-        <input type="range" min="0" max="40" value="0" class="theme-light" id="bgLight">
+        <input type="range" min="0" max="70" value="0" class="theme-light" id="bgLight">
         <span class="muted" style="font-size:11px;width:38px">lighter</span>
       </div>
       <div class="theme-row">
@@ -738,8 +738,8 @@ function initThemePicker(){
 }
 // Background picker (second wheel — controls --bg)
 const BG_PRESETS=[
-  ['Black','#000000'],['Charcoal','#0a0a0a'],['Slate','#0d1117'],['Navy','#050a14'],
-  ['Forest','#03100A'],['Wine','#0F0405'],['Cosmos','#0a0512'],['Off-Black','#141414']
+  ['Black','#000000'],['Charcoal','#4B5563'],['Slate','#64748B'],['Navy','#1E40AF'],
+  ['Forest','#15803D'],['Wine','#B91C1C'],['Cosmos','#7C3AED'],['Teal','#0D9488']
 ];
 function drawBgWheel(){
   const cv=document.getElementById('bgWheel'); if(!cv) return;
