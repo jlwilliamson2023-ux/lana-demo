@@ -193,7 +193,12 @@
         background:radial-gradient(ellipse at center, var(--ok-glow-tint) 0%, transparent 60%);
         pointer-events:none}
   .hero-left{flex:1;min-width:240px;position:relative;z-index:1}
-  .hero-left h1{font-size:44px;letter-spacing:2px;margin:0;font-weight:800;line-height:1}
+  .hero-left h1{font-size:44px;letter-spacing:2px;margin:0;font-weight:800;line-height:1;
+    color:var(--card);text-shadow:0 0 18px var(--card)55}
+  .hero-status{position:absolute;top:14px;right:16px;z-index:3;color:var(--card);
+    font-size:18px;line-height:1;animation:livePulse 2s ease-in-out infinite;
+    text-shadow:0 0 10px var(--card)}
+  @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.45}}
   .hero .tag{color:var(--dim);font-size:13px;margin-top:6px;letter-spacing:.4px}
   .hero-meter{display:flex;gap:14px;align-items:center;margin-top:16px}
   .hero-stat{color:var(--ok);font-size:12px;font-weight:600;margin-top:6px;letter-spacing:.3px}
@@ -205,6 +210,7 @@
 <body>
   <!-- hero: brand + live stats + animated system visualization -->
   <div class="hero">
+    <div class="hero-status" title="LIVE">●</div>
     <div class="hero-left">
       <h1>LANA<span class="dot">.</span></h1>
       <div class="tag">your AI Chief of Staff</div>
@@ -257,7 +263,7 @@
       </div>
       <div class="theme-row">
         <span class="muted" style="font-size:11px;width:32px">dim</span>
-        <input type="range" min="25" max="75" value="50" class="theme-light" id="themeLight">
+        <input type="range" min="10" max="90" value="50" class="theme-light" id="themeLight">
         <span class="muted" style="font-size:11px;width:38px">bright</span>
       </div>
       <div class="theme-row">
@@ -295,7 +301,7 @@
       </div>
       <div class="theme-row">
         <span class="muted" style="font-size:11px;width:32px">darker</span>
-        <input type="range" min="2" max="35" value="5" class="theme-light" id="cardLight">
+        <input type="range" min="0" max="60" value="5" class="theme-light" id="cardLight">
         <span class="muted" style="font-size:11px;width:38px">lighter</span>
       </div>
       <div class="theme-row">
@@ -655,6 +661,25 @@ function drawThemeWheel(){
   }
   ctx.putImageData(img,0,0);
 }
+function hexToHsl(hex){
+  if(!hex||hex.length<7) return {h:0,s:0,l:0};
+  const r=parseInt(hex.substr(1,2),16)/255;
+  const g=parseInt(hex.substr(3,2),16)/255;
+  const b=parseInt(hex.substr(5,2),16)/255;
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b);
+  let h=0, s=0, l=(mx+mn)/2;
+  if(mx!==mn){
+    const d=mx-mn;
+    s = l>0.5 ? d/(2-mx-mn) : d/(mx+mn);
+    if(mx===r) h=((g-b)/d+(g<b?6:0))/6;
+    else if(mx===g) h=((b-r)/d+2)/6;
+    else h=((r-g)/d+4)/6;
+  }
+  return {h:h*360, s:s*100, l:l*100};
+}
+// Per-picker hue+saturation state so the brightness slider can adjust without losing the color
+let ACCENT_HS={h:100,s:78}, BG_HS={h:0,s:0}, CARD_HS={h:0,s:0};
+
 function darkenHex(hex, factor){
   factor = factor || 0.55;
   const r=Math.round(parseInt(hex.substr(1,2),16)*factor);
@@ -662,10 +687,14 @@ function darkenHex(hex, factor){
   const b=Math.round(parseInt(hex.substr(5,2),16)*factor);
   return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('').toUpperCase();
 }
-function applyAccent(hex){
+function applyAccent(hex, opts){
   if(!hex||!/^#[0-9A-Fa-f]{6}$/.test(hex)) return;
   hex=hex.toUpperCase();
   const dark=darkenHex(hex,0.55);
+  // Remember hue+sat so the slider can rebrightent this color without losing it
+  const hsl=hexToHsl(hex); ACCENT_HS={h:hsl.h, s:hsl.s};
+  const _s=document.getElementById('themeLight');
+  if(_s && !(opts&&opts.fromSlider)) _s.value=Math.round(hsl.l);
   document.documentElement.style.setProperty('--ok',hex);
   document.documentElement.style.setProperty('--accent',hex);
   document.documentElement.style.setProperty('--ok-dark',dark);
@@ -721,7 +750,11 @@ function initThemePicker(){
   document.getElementById('themePresets').innerHTML = THEME_PRESETS.map(p=>
     '<button class="preset" data-hex="'+p[1]+'" style="background:'+p[1]+'" onclick="applyAccent(\''+p[1]+'\')" title="'+p[0]+'"></button>'
   ).join('');
-  document.getElementById('themeLight').addEventListener('input', drawThemeWheel);
+  document.getElementById('themeLight').addEventListener('input', ()=>{
+    drawThemeWheel();
+    const L=parseInt(document.getElementById('themeLight').value,10);
+    applyAccent(hslToHex(ACCENT_HS.h, ACCENT_HS.s, L), {fromSlider:true});
+  });
   let dragging=false;
   cv.addEventListener('mousedown', e=>{dragging=true; pickFromWheel(e);});
   cv.addEventListener('mousemove', e=>{ if(dragging) pickFromWheel(e); });
@@ -759,9 +792,12 @@ function drawBgWheel(){
   }
   ctx.putImageData(img,0,0);
 }
-function applyBg(hex){
+function applyBg(hex, opts){
   if(!hex||!/^#[0-9A-Fa-f]{6}$/.test(hex)) return;
   hex=hex.toUpperCase();
+  const hsl=hexToHsl(hex); BG_HS={h:hsl.h, s:hsl.s};
+  const _s=document.getElementById('bgLight');
+  if(_s && !(opts&&opts.fromSlider)) _s.value=Math.round(hsl.l);
   document.documentElement.style.setProperty('--bg',hex);
   document.body.style.backgroundColor=hex;
   // Re-apply accent glow on top of the new bg
@@ -809,7 +845,11 @@ initThemePicker = function(){
   document.getElementById('bgPresets').innerHTML = BG_PRESETS.map(p=>
     '<button class="preset" data-hex="'+p[1]+'" style="background:'+p[1]+'" onclick="applyBg(\''+p[1]+'\')" title="'+p[0]+'"></button>'
   ).join('');
-  document.getElementById('bgLight').addEventListener('input', drawBgWheel);
+  document.getElementById('bgLight').addEventListener('input', ()=>{
+    drawBgWheel();
+    const L=parseInt(document.getElementById('bgLight').value,10);
+    applyBg(hslToHex(BG_HS.h, BG_HS.s, L), {fromSlider:true});
+  });
   let dragging=false;
   cv.addEventListener('mousedown', e=>{dragging=true; pickFromBgWheel(e);});
   cv.addEventListener('mousemove', e=>{ if(dragging) pickFromBgWheel(e); });
@@ -826,8 +866,8 @@ initThemePicker = function(){
 
 // Card / box picker (third wheel — controls --card)
 const CARD_PRESETS=[
-  ['Default','#0c0c0c'],['Charcoal','#161616'],['Steel','#1a1a1f'],['Slate','#0f1620'],
-  ['Forest','#0a1a10'],['Plum','#170d1e'],['Wine','#180a0c'],['Olive','#161608']
+  ['Default','#0c0c0c'],['Charcoal','#1a1a1a'],['Slate','#334155'],['Steel','#475569'],
+  ['Forest','#166534'],['Plum','#581c87'],['Wine','#7f1d1d'],['Olive','#4d7c0f']
 ];
 function drawCardWheel(){
   const cv=document.getElementById('cardWheel'); if(!cv) return;
@@ -847,9 +887,12 @@ function drawCardWheel(){
   }
   ctx.putImageData(img,0,0);
 }
-function applyCard(hex){
+function applyCard(hex, opts){
   if(!hex||!/^#[0-9A-Fa-f]{6}$/.test(hex)) return;
   hex=hex.toUpperCase();
+  const hsl=hexToHsl(hex); CARD_HS={h:hsl.h, s:hsl.s};
+  const _s=document.getElementById('cardLight');
+  if(_s && !(opts&&opts.fromSlider)) _s.value=Math.round(hsl.l);
   document.documentElement.style.setProperty('--card',hex);
   const hexInput=document.getElementById('cardHex'); if(hexInput) hexInput.value=hex;
   try{ localStorage.setItem('lanaCard',hex); }catch(e){}
@@ -886,7 +929,11 @@ initThemePicker = function(){
   document.getElementById('cardPresets').innerHTML = CARD_PRESETS.map(p=>
     '<button class="preset" data-hex="'+p[1]+'" style="background:'+p[1]+'" onclick="applyCard(\''+p[1]+'\')" title="'+p[0]+'"></button>'
   ).join('');
-  document.getElementById('cardLight').addEventListener('input', drawCardWheel);
+  document.getElementById('cardLight').addEventListener('input', ()=>{
+    drawCardWheel();
+    const L=parseInt(document.getElementById('cardLight').value,10);
+    applyCard(hslToHex(CARD_HS.h, CARD_HS.s, L), {fromSlider:true});
+  });
   let dragging=false;
   cv.addEventListener('mousedown', e=>{dragging=true; pickFromCardWheel(e);});
   cv.addEventListener('mousemove', e=>{ if(dragging) pickFromCardWheel(e); });
@@ -1277,13 +1324,15 @@ async function load(){
     document.getElementById('imsg').textContent   = d.imessage.replies_today;
     document.getElementById('emails').textContent = d.email.replies_today;
     document.getElementById('cost').textContent   = '$'+(d.cost?d.cost.cost:0).toFixed(2);
-    // health ring
-    const h=d.health, col = h.state==='good'?'#44D62C':(h.state==='warn'?'#ffc857':'#ff5d5d');
+    // health ring — when fully healthy, flex 199%; show actual number if anything degraded
+    const h=d.health, col = h.state==='good'?'var(--ok)':(h.state==='warn'?'#ffc857':'#ff5d5d');
     const ring=document.getElementById('ring');
-    ring.style.background=`conic-gradient(${col} ${h.score}%, #1f2a38 0)`;
-    document.getElementById('ringPct').textContent=h.score+'%';
+    const fullyHealthy = (h.score>=100 && h.state==='good');
+    const displayScore = fullyHealthy ? 199 : h.score;
+    ring.style.background=`conic-gradient(${col} ${Math.min(h.score,100)}%, var(--line) 0)`;
+    document.getElementById('ringPct').textContent=displayScore+'%';
     document.getElementById('ringPct').style.color=col;
-    document.getElementById('healthLabel').textContent=h.label;
+    document.getElementById('healthLabel').textContent=fullyHealthy?'All systems 199%':h.label;
     document.getElementById('healthLabel').style.color=col;
     document.getElementById('healthSub').textContent=`${h.healthy}/${h.total} services healthy`;
     // control state
@@ -1402,5 +1451,5 @@ setInterval(()=>{  // live-tick the queue countdowns between full refreshes
   document.querySelectorAll('.qc').forEach(el=>{});
 }, 1000);
 </script>
-<div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#0a0e14;border-bottom:1px solid #1c2735;display:flex;align-items:center;justify-content:space-between;padding:9px 16px;font-family:-apple-system,system-ui,sans-serif;box-shadow:0 2px 12px rgba(0,0,0,.4)">  <div style="display:flex;align-items:center;gap:10px">    <span style="font-size:19px;font-weight:800;letter-spacing:1.5px;color:#e8eef5">LANA<span style="color:#2ee6a0">.</span></span>    <span style="color:#7a8a9a;font-size:12px;font-weight:500;border-left:1px solid #1c2735;padding-left:10px">Your AI Chief of Staff</span>  </div>  <span style="background:#2ee6a0;color:#06281c;border-radius:999px;padding:3px 11px;font-size:11px;font-weight:800;letter-spacing:.5px">LIVE DEMO</span></div><script>document.addEventListener("DOMContentLoaded",function(){document.body.style.paddingTop="50px";});</script></body>
+<div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#0a0e14;border-bottom:1px solid #1c2735;display:flex;align-items:center;justify-content:space-between;padding:9px 16px;font-family:-apple-system,system-ui,sans-serif;box-shadow:0 2px 12px rgba(0,0,0,.4)">  <div style="display:flex;align-items:center;gap:10px">    <span style="font-size:19px;font-weight:800;letter-spacing:1.5px;color:#e8eef5">LANA<span style="color:var(--ok)">.</span></span>    <span style="color:#7a8a9a;font-size:12px;font-weight:500;border-left:1px solid #1c2735;padding-left:10px">Your AI Chief of Staff</span>  </div>  <span style="background:var(--ok);color:#000;border-radius:999px;padding:3px 11px;font-size:11px;font-weight:800;letter-spacing:.5px;box-shadow:0 0 10px var(--ok-glow)">LIVE DEMO</span></div><script>document.addEventListener("DOMContentLoaded",function(){document.body.style.paddingTop="50px";});</script></body>
 </html>
