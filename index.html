@@ -144,6 +144,29 @@
   .bar:hover{opacity:1}
 
   .ok{color:var(--ok)} .muted{color:var(--dim);font-size:12px}
+
+  /* Theme picker (Govee-style color wheel) */
+  .theme-wheel{position:relative;width:220px;height:220px;margin:10px auto 14px;
+    border-radius:50%;box-shadow:0 6px 24px rgba(0,0,0,.6), 0 0 0 1px #1a1a1a;
+    cursor:crosshair;user-select:none;-webkit-user-select:none;touch-action:none}
+  .theme-wheel canvas{display:block;border-radius:50%}
+  .theme-wheel .pointer{position:absolute;width:14px;height:14px;border-radius:50%;
+    border:2px solid #fff;pointer-events:none;transform:translate(-50%,-50%);
+    box-shadow:0 0 8px rgba(0,0,0,.7);left:50%;top:50%}
+  .theme-row{display:flex;align-items:center;gap:10px;margin:10px 0}
+  .theme-light{flex:1;-webkit-appearance:none;appearance:none;height:10px;border-radius:5px;
+    background:linear-gradient(90deg,#000,#fff);outline:none;border:1px solid #1f1f1f}
+  .theme-light::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;
+    border-radius:50%;background:var(--ok);border:2px solid #fff;cursor:pointer;
+    box-shadow:0 0 6px rgba(0,0,0,.5)}
+  .theme-hex{width:110px !important;font-family:"SF Mono",ui-monospace,monospace;
+    text-transform:uppercase;letter-spacing:.5px;margin:0 !important}
+  .theme-presets{display:flex;flex-wrap:wrap;gap:9px;margin:10px 0 4px;justify-content:center}
+  .preset{width:30px;height:30px;border-radius:50%;border:2px solid #1f1f1f;
+    cursor:pointer;transition:transform .15s ease, border-color .15s ease;padding:0;
+    box-shadow:0 2px 8px rgba(0,0,0,.4)}
+  .preset:hover{transform:scale(1.12);border-color:#fff}
+  .preset.active{border-color:#fff;transform:scale(1.12)}
   /* Hero: brand + live stats + animated system visualization */
   body{background:radial-gradient(1100px 500px at 110% -10%, #44D62C12, transparent 55%),
                   radial-gradient(900px 600px at -10% 110%, #44D62C08, transparent 50%),
@@ -207,6 +230,29 @@
       <text x="120" y="124" text-anchor="middle" fill="#002400" font-size="11" font-weight="900" font-family="-apple-system,sans-serif">LANA</text>
     </svg>
   </div>
+
+  <!-- theme picker: change the accent color (Govee-style) -->
+  <details ontoggle="if(this.open)initThemePicker()">
+    <summary>🎨 Theme</summary>
+    <div style="padding:0 0 14px">
+      <div class="muted" style="margin-bottom:6px;text-align:center">Tap or drag the wheel · saves automatically</div>
+      <div class="theme-wheel" id="themeWheelBox">
+        <canvas id="themeWheel" width="220" height="220"></canvas>
+        <div class="pointer" id="themePointer"></div>
+      </div>
+      <div class="theme-row">
+        <span class="muted" style="font-size:11px;width:32px">dim</span>
+        <input type="range" min="25" max="75" value="50" class="theme-light" id="themeLight">
+        <span class="muted" style="font-size:11px;width:38px">bright</span>
+      </div>
+      <div class="theme-row">
+        <input class="theme-hex" id="themeHex" maxlength="7" placeholder="#44D62C">
+        <button class="go" onclick="applyHex()">Apply</button>
+        <button onclick="resetTheme()">Razer</button>
+      </div>
+      <div class="theme-presets" id="themePresets"></div>
+    </div>
+  </details>
 
   <!-- agent console: give LANA any task -->
   <div class="card">
@@ -524,6 +570,107 @@ function toggleFeat(f){ post('/control',{action:'toggle',feature:f,on:!FEAT[f]})
 function cancelEmail(id){ post('/email-action',{action:'cancel',id}); }
 function sendNow(id){ post('/email-action',{action:'send_now',id}); }
 function resolveMem(kind,id){ post('/memory-action',{kind,id}); }
+
+// Theme picker (Govee-style)
+const THEME_PRESETS=[
+  ['Razer','#44D62C'],['Cyan','#00D4FF'],['Pink','#FF2E88'],['Orange','#FF8C42'],
+  ['Yellow','#FFEE00'],['Purple','#A78BFA'],['Ice','#B5D3FF'],['White','#FFFFFF']
+];
+let CURRENT_ACCENT='#44D62C';
+function hslToHex(h,s,l){
+  l/=100; s/=100;
+  const a=s*Math.min(l,1-l);
+  const f=n=>{const k=(n+h/30)%12;const v=l-a*Math.max(-1,Math.min(k-3,9-k,1));
+    return Math.round(v*255).toString(16).padStart(2,'0');};
+  return ('#'+f(0)+f(8)+f(4)).toUpperCase();
+}
+function drawThemeWheel(){
+  const cv=document.getElementById('themeWheel'); if(!cv) return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height,r=W/2;
+  const L=parseInt(document.getElementById('themeLight').value,10);
+  const img=ctx.createImageData(W,H);
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+    const dx=x-r,dy=y-r,dist=Math.sqrt(dx*dx+dy*dy),i=(y*W+x)*4;
+    if(dist>r){img.data[i+3]=0;continue;}
+    const sat=(dist/r)*100;
+    let hue=Math.atan2(dy,dx)*180/Math.PI; if(hue<0)hue+=360;
+    const hex=hslToHex(hue,sat,L);
+    img.data[i]=parseInt(hex.substr(1,2),16);
+    img.data[i+1]=parseInt(hex.substr(3,2),16);
+    img.data[i+2]=parseInt(hex.substr(5,2),16);
+    img.data[i+3]=255;
+  }
+  ctx.putImageData(img,0,0);
+}
+function applyAccent(hex){
+  if(!hex||!/^#[0-9A-Fa-f]{6}$/.test(hex)) return;
+  hex=hex.toUpperCase();
+  document.documentElement.style.setProperty('--ok',hex);
+  document.documentElement.style.setProperty('--accent',hex);
+  // Update inline SVG hardcoded color (hero radar/orbits/center brand)
+  document.querySelectorAll('.hero-svg [fill="'+CURRENT_ACCENT+'"]').forEach(el=>el.setAttribute('fill',hex));
+  document.querySelectorAll('.hero-svg [stroke="'+CURRENT_ACCENT+'"]').forEach(el=>el.setAttribute('stroke',hex));
+  document.querySelectorAll('.hero-svg stop[stop-color="'+CURRENT_ACCENT+'"]').forEach(el=>el.setAttribute('stop-color',hex));
+  CURRENT_ACCENT=hex;
+  // Body glow follows the accent
+  document.body.style.backgroundImage =
+    'radial-gradient(1100px 500px at 110% -10%, '+hex+'1f, transparent 55%),'+
+    'radial-gradient(900px 600px at -10% 110%, '+hex+'10, transparent 50%)';
+  const hexInput=document.getElementById('themeHex'); if(hexInput) hexInput.value=hex;
+  try{ localStorage.setItem('lanaAccent',hex); }catch(e){}
+  // Mark active preset
+  document.querySelectorAll('.preset').forEach(p=>{
+    p.classList.toggle('active', p.dataset.hex && p.dataset.hex.toUpperCase()===hex);
+  });
+}
+function applyHex(){ applyAccent(document.getElementById('themeHex').value); }
+function resetTheme(){
+  applyAccent('#44D62C');
+  const s=document.getElementById('themeLight'); if(s){s.value=50; drawThemeWheel();}
+}
+function pickFromWheel(ev){
+  const cv=document.getElementById('themeWheel'); if(!cv) return;
+  const rect=cv.getBoundingClientRect();
+  const cx=ev.touches?ev.touches[0].clientX:ev.clientX;
+  const cy=ev.touches?ev.touches[0].clientY:ev.clientY;
+  const x=cx-rect.left, y=cy-rect.top, r=cv.width/2;
+  const dx=x-r, dy=y-r, dist=Math.sqrt(dx*dx+dy*dy);
+  if(dist>r) return;
+  const sat=(dist/r)*100;
+  let hue=Math.atan2(dy,dx)*180/Math.PI; if(hue<0)hue+=360;
+  const L=parseInt(document.getElementById('themeLight').value,10);
+  applyAccent(hslToHex(hue,sat,L));
+  const p=document.getElementById('themePointer');
+  if(p){ p.style.left=x+'px'; p.style.top=y+'px'; }
+}
+function initThemePicker(){
+  const cv=document.getElementById('themeWheel'); if(!cv || cv.dataset.init) return;
+  cv.dataset.init='1';
+  document.getElementById('themePresets').innerHTML = THEME_PRESETS.map(p=>
+    '<button class="preset" data-hex="'+p[1]+'" style="background:'+p[1]+'" onclick="applyAccent(\''+p[1]+'\')" title="'+p[0]+'"></button>'
+  ).join('');
+  document.getElementById('themeLight').addEventListener('input', drawThemeWheel);
+  let dragging=false;
+  cv.addEventListener('mousedown', e=>{dragging=true; pickFromWheel(e);});
+  cv.addEventListener('mousemove', e=>{ if(dragging) pickFromWheel(e); });
+  document.addEventListener('mouseup', ()=>dragging=false);
+  cv.addEventListener('touchstart', e=>{pickFromWheel(e); e.preventDefault();},{passive:false});
+  cv.addEventListener('touchmove', e=>{pickFromWheel(e); e.preventDefault();},{passive:false});
+  drawThemeWheel();
+  // Reflect current accent in the picker
+  const hexInput=document.getElementById('themeHex');
+  if(hexInput) hexInput.value=CURRENT_ACCENT;
+  document.querySelectorAll('.preset').forEach(p=>{
+    p.classList.toggle('active', p.dataset.hex && p.dataset.hex.toUpperCase()===CURRENT_ACCENT);
+  });
+}
+// Load saved accent on page boot (runs before SVG queries pick up #44D62C — ok, SVG just loaded)
+(function(){
+  try{
+    const saved=localStorage.getItem('lanaAccent');
+    if(saved) setTimeout(()=>applyAccent(saved), 0);
+  }catch(e){}
+})();
 
 // Approvals
 async function approve(id,action){ await post('/approval-action',{id,action}); }
