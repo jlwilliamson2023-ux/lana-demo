@@ -11,8 +11,9 @@
 <meta name="theme-color" content="#0a0e14">
 <link rel="apple-touch-icon" href="/icon.png">
 <style>
-  :root{ --bg:#000000; --card:#0a0a0a; --line:#1f1f1f; --txt:#ffffff;
-         --dim:#7a7a7a; --ok:#44D62C; --bad:#ff3838; --warn:#ffb800; --accent:#44D62C; }
+  :root{ --bg:#000000; --card:#0c0c0c; --line:#1f1f1f; --txt:#ffffff;
+         --dim:#7a7a7a; --ok:#44D62C; --bad:#ff3838; --warn:#ffb800; --accent:#44D62C;
+         --ok-dark:#2a8a1a; --ok-glow:#44D62C55; --ok-glow-soft:#44D62C1a; --ok-glow-tint:#44D62C2a; }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   body{margin:0;background:var(--bg);color:var(--txt);
        font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
@@ -23,14 +24,14 @@
   .clock{color:var(--dim);font-size:13px;margin-bottom:18px}
   /* health ring used inside the hero */
   .ring{width:84px;height:84px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;position:relative}
-  .ring::after{content:"";position:absolute;inset:9px;border-radius:50%;background:#0a0a0a}
+  .ring::after{content:"";position:absolute;inset:9px;border-radius:50%;background:var(--card)}
   .ring span{position:relative;z-index:1;font-size:21px;font-weight:700}
   .mlabel{font-size:18px;font-weight:700;letter-spacing:-.2px}
   .msub{color:var(--dim);font-size:13px;margin-top:3px}
 
   /* stat tiles */
   .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
-  .stat{position:relative;background:linear-gradient(180deg,#0c0c0c 0%,#050505 100%);
+  .stat{position:relative;background:var(--card);
         border:1px solid var(--line);border-radius:14px;padding:14px 16px;overflow:hidden;
         box-shadow:0 2px 10px rgba(0,0,0,.22), inset 0 1px 0 #ffffff05;
         transition:transform .15s ease, border-color .15s ease}
@@ -40,7 +41,7 @@
   .stat .l{color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:1.1px;margin-top:3px}
 
   /* cards */
-  .card{background:linear-gradient(180deg,#0c0c0c 0%,#050505 100%);
+  .card{background:var(--card);
         border:1px solid var(--line);border-radius:16px;padding:14px 18px;margin-bottom:14px;
         box-shadow:0 4px 16px rgba(0,0,0,.25), inset 0 1px 0 #ffffff06}
   .ctrl{padding:16px 18px}
@@ -56,7 +57,7 @@
          box-shadow:inset 0 1px 0 #ffffff07}
   button:hover{filter:brightness(1.12);transform:translateY(-1px);border-color:#2a2a2a}
   button:active{transform:translateY(0) scale(.98)}
-  button.go{background:linear-gradient(180deg,#44D62C 0%,#2a8a1a 100%);color:#002400;border-color:#2a8a1a;font-weight:700}
+  button.go{background:linear-gradient(180deg,var(--ok) 0%,var(--ok-dark) 100%);color:#002400;border-color:var(--ok-dark);font-weight:700}
   button.warn{background:linear-gradient(180deg,#ffd680 0%,#e6b860 100%);color:#3a2a00;border-color:#e6b860;font-weight:700}
   button.danger{background:linear-gradient(180deg,#ff7a7a 0%,#e85a5a 100%);color:#3a0000;border-color:#e85a5a;font-weight:700}
 
@@ -119,12 +120,12 @@
        transition:border-color .12s ease, box-shadow .12s ease, background .12s ease}
   input::placeholder,textarea::placeholder{color:#5a6878}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ok);
-       box-shadow:0 0 0 3px #44D62C1a;background:#0a0a0a}
+       box-shadow:0 0 0 3px var(--ok-glow-soft);background:#0a0a0a}
   textarea{min-height:78px;resize:vertical;line-height:1.5}
   .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
   /* collapsible sections */
-  details{background:linear-gradient(180deg,#0c0c0c 0%,#050505 100%);
+  details{background:var(--card);
           border:1px solid var(--line);border-radius:14px;padding:0 18px;margin-bottom:12px;
           box-shadow:0 2px 10px rgba(0,0,0,.2), inset 0 1px 0 #ffffff06;
           transition:border-color .15s ease}
@@ -172,7 +173,7 @@
     border:1px solid #1f1f1f;cursor:pointer;font-size:12px;font-weight:700;color:var(--dim);
     text-align:center;letter-spacing:.5px;transition:all .15s}
   .theme-tabs .tab.active{background:var(--ok);color:#000;border-color:var(--ok);
-    box-shadow:0 0 14px #44D62C55}
+    box-shadow:0 0 14px var(--ok-glow)}
   .theme-label{font-size:13px;font-weight:700;letter-spacing:.4px;color:var(--txt);
     margin:6px 0 2px;text-align:center;text-transform:uppercase;opacity:.85}
   .theme-divider{height:1px;background:linear-gradient(90deg,transparent,#1f1f1f,transparent);
@@ -184,12 +185,12 @@
        background-image:radial-gradient(1100px 500px at 110% -10%, #44D62C12, transparent 55%),
                         radial-gradient(900px 600px at -10% 110%, #44D62C08, transparent 50%)}
   .hero{display:flex;gap:22px;align-items:center;justify-content:space-between;
-        background:linear-gradient(135deg,#0a0a0a 0%,#000000 100%);
+        background:linear-gradient(135deg,var(--card) 0%,var(--bg) 100%);
         border:1px solid #1f1f1f;border-radius:18px;padding:22px;margin:0 0 18px;
         position:relative;overflow:hidden;flex-wrap:wrap;
-        box-shadow:0 8px 32px rgba(0,0,0,.6), inset 0 1px 0 #44D62C18}
+        box-shadow:0 8px 32px rgba(0,0,0,.6), inset 0 1px 0 var(--ok-glow-soft)}
   .hero::before{content:"";position:absolute;left:-20%;top:-50%;width:65%;height:200%;
-        background:radial-gradient(ellipse at center, #44D62C2a 0%, transparent 60%);
+        background:radial-gradient(ellipse at center, var(--ok-glow-tint) 0%, transparent 60%);
         pointer-events:none}
   .hero-left{flex:1;min-width:240px;position:relative;z-index:1}
   .hero-left h1{font-size:44px;letter-spacing:2px;margin:0;font-weight:800;line-height:1}
@@ -284,6 +285,25 @@
         <button onclick="resetBg()">Black</button>
       </div>
       <div class="theme-presets" id="bgPresets"></div>
+
+      <div class="theme-divider"></div>
+
+      <div class="theme-label">Card / box color</div>
+      <div class="theme-wheel theme-wheel-sm" id="cardWheelBox">
+        <canvas id="cardWheel" width="180" height="180"></canvas>
+        <div class="pointer" id="cardPointer"></div>
+      </div>
+      <div class="theme-row">
+        <span class="muted" style="font-size:11px;width:32px">darker</span>
+        <input type="range" min="2" max="35" value="5" class="theme-light" id="cardLight">
+        <span class="muted" style="font-size:11px;width:38px">lighter</span>
+      </div>
+      <div class="theme-row">
+        <input class="theme-hex" id="cardHex" maxlength="7" placeholder="#0c0c0c">
+        <button class="go" onclick="applyCardHex()">Apply</button>
+        <button onclick="resetCard()">Default</button>
+      </div>
+      <div class="theme-presets" id="cardPresets"></div>
     </div>
   </details>
 
@@ -635,15 +655,34 @@ function drawThemeWheel(){
   }
   ctx.putImageData(img,0,0);
 }
+function darkenHex(hex, factor){
+  factor = factor || 0.55;
+  const r=Math.round(parseInt(hex.substr(1,2),16)*factor);
+  const g=Math.round(parseInt(hex.substr(3,2),16)*factor);
+  const b=Math.round(parseInt(hex.substr(5,2),16)*factor);
+  return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('').toUpperCase();
+}
 function applyAccent(hex){
   if(!hex||!/^#[0-9A-Fa-f]{6}$/.test(hex)) return;
   hex=hex.toUpperCase();
+  const dark=darkenHex(hex,0.55);
   document.documentElement.style.setProperty('--ok',hex);
   document.documentElement.style.setProperty('--accent',hex);
-  // Update inline SVG hardcoded color (hero radar/orbits/center brand)
+  document.documentElement.style.setProperty('--ok-dark',dark);
+  document.documentElement.style.setProperty('--ok-glow',hex+'55');
+  document.documentElement.style.setProperty('--ok-glow-soft',hex+'1a');
+  document.documentElement.style.setProperty('--ok-glow-tint',hex+'2a');
+  // Update inline SVG hardcoded colors (hero radar/orbits/center brand + dim secondary nodes)
   document.querySelectorAll('.hero-svg [fill="'+CURRENT_ACCENT+'"]').forEach(el=>el.setAttribute('fill',hex));
   document.querySelectorAll('.hero-svg [stroke="'+CURRENT_ACCENT+'"]').forEach(el=>el.setAttribute('stroke',hex));
   document.querySelectorAll('.hero-svg stop[stop-color="'+CURRENT_ACCENT+'"]').forEach(el=>el.setAttribute('stop-color',hex));
+  if(window._lanaDark){
+    document.querySelectorAll('.hero-svg [fill="'+window._lanaDark+'"]').forEach(el=>el.setAttribute('fill',dark));
+  } else {
+    // first-run: secondary nodes are #2a8a1a in source
+    document.querySelectorAll('.hero-svg [fill="#2a8a1a"]').forEach(el=>el.setAttribute('fill',dark));
+  }
+  window._lanaDark=dark;
   CURRENT_ACCENT=hex;
   // Body glow follows the accent
   document.body.style.backgroundImage =
@@ -785,6 +824,83 @@ initThemePicker = function(){
   });
 };
 
+// Card / box picker (third wheel — controls --card)
+const CARD_PRESETS=[
+  ['Default','#0c0c0c'],['Charcoal','#161616'],['Steel','#1a1a1f'],['Slate','#0f1620'],
+  ['Forest','#0a1a10'],['Plum','#170d1e'],['Wine','#180a0c'],['Olive','#161608']
+];
+function drawCardWheel(){
+  const cv=document.getElementById('cardWheel'); if(!cv) return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height,r=W/2;
+  const L=parseInt(document.getElementById('cardLight').value,10);
+  const img=ctx.createImageData(W,H);
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+    const dx=x-r,dy=y-r,dist=Math.sqrt(dx*dx+dy*dy),i=(y*W+x)*4;
+    if(dist>r){img.data[i+3]=0;continue;}
+    const sat=(dist/r)*100;
+    let hue=Math.atan2(dy,dx)*180/Math.PI; if(hue<0)hue+=360;
+    const hex=hslToHex(hue,sat,L);
+    img.data[i]=parseInt(hex.substr(1,2),16);
+    img.data[i+1]=parseInt(hex.substr(3,2),16);
+    img.data[i+2]=parseInt(hex.substr(5,2),16);
+    img.data[i+3]=255;
+  }
+  ctx.putImageData(img,0,0);
+}
+function applyCard(hex){
+  if(!hex||!/^#[0-9A-Fa-f]{6}$/.test(hex)) return;
+  hex=hex.toUpperCase();
+  document.documentElement.style.setProperty('--card',hex);
+  const hexInput=document.getElementById('cardHex'); if(hexInput) hexInput.value=hex;
+  try{ localStorage.setItem('lanaCard',hex); }catch(e){}
+  document.querySelectorAll('#cardPresets .preset').forEach(p=>{
+    p.classList.toggle('active', p.dataset.hex && p.dataset.hex.toUpperCase()===hex);
+  });
+}
+function applyCardHex(){ applyCard(document.getElementById('cardHex').value); }
+function resetCard(){
+  applyCard('#0c0c0c');
+  const s=document.getElementById('cardLight'); if(s){s.value=5; drawCardWheel();}
+}
+function pickFromCardWheel(ev){
+  const cv=document.getElementById('cardWheel'); if(!cv) return;
+  const rect=cv.getBoundingClientRect();
+  const cx=ev.touches?ev.touches[0].clientX:ev.clientX;
+  const cy=ev.touches?ev.touches[0].clientY:ev.clientY;
+  const x=cx-rect.left, y=cy-rect.top, r=cv.width/2;
+  const dx=x-r, dy=y-r, dist=Math.sqrt(dx*dx+dy*dy);
+  if(dist>r) return;
+  const sat=(dist/r)*100;
+  let hue=Math.atan2(dy,dx)*180/Math.PI; if(hue<0)hue+=360;
+  const L=parseInt(document.getElementById('cardLight').value,10);
+  applyCard(hslToHex(hue,sat,L));
+  const p=document.getElementById('cardPointer');
+  if(p){ p.style.left=x+'px'; p.style.top=y+'px'; }
+}
+// Extend initThemePicker again to also wire the card picker
+const _origInit2 = initThemePicker;
+initThemePicker = function(){
+  _origInit2();
+  const cv=document.getElementById('cardWheel'); if(!cv || cv.dataset.init) return;
+  cv.dataset.init='1';
+  document.getElementById('cardPresets').innerHTML = CARD_PRESETS.map(p=>
+    '<button class="preset" data-hex="'+p[1]+'" style="background:'+p[1]+'" onclick="applyCard(\''+p[1]+'\')" title="'+p[0]+'"></button>'
+  ).join('');
+  document.getElementById('cardLight').addEventListener('input', drawCardWheel);
+  let dragging=false;
+  cv.addEventListener('mousedown', e=>{dragging=true; pickFromCardWheel(e);});
+  cv.addEventListener('mousemove', e=>{ if(dragging) pickFromCardWheel(e); });
+  document.addEventListener('mouseup', ()=>dragging=false);
+  cv.addEventListener('touchstart', e=>{pickFromCardWheel(e); e.preventDefault();},{passive:false});
+  cv.addEventListener('touchmove', e=>{pickFromCardWheel(e); e.preventDefault();},{passive:false});
+  drawCardWheel();
+  const cur = (localStorage.getItem('lanaCard')||'#0c0c0c').toUpperCase();
+  const hexInput=document.getElementById('cardHex'); if(hexInput) hexInput.value=cur;
+  document.querySelectorAll('#cardPresets .preset').forEach(p=>{
+    p.classList.toggle('active', p.dataset.hex && p.dataset.hex.toUpperCase()===cur);
+  });
+};
+
 // Load saved theme on page boot
 (function(){
   try{
@@ -792,6 +908,8 @@ initThemePicker = function(){
     if(sa) setTimeout(()=>applyAccent(sa), 0);
     const sb=localStorage.getItem('lanaBg');
     if(sb) setTimeout(()=>applyBg(sb), 0);
+    const sc=localStorage.getItem('lanaCard');
+    if(sc) setTimeout(()=>applyCard(sc), 0);
   }catch(e){}
 })();
 
