@@ -174,12 +174,41 @@
     text-align:center;letter-spacing:.5px;transition:all .15s}
   .theme-tabs .tab.active{background:var(--ok);color:#000;border-color:var(--ok);
     box-shadow:0 0 14px var(--ok-glow)}
+  /* Engine-style gauges: TEMP / RPM / BOOST */
+  .gauges{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+  .gauge{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:14px 10px 10px;text-align:center;overflow:hidden}
+  .gauge svg{width:100%;max-width:200px;height:auto;display:block;margin:0 auto}
+  .gauge .gv{font-size:18px;color:var(--ok);font-weight:800;font-family:"SF Mono",ui-monospace,monospace;
+    letter-spacing:.5px;margin-top:-4px;text-shadow:0 0 10px var(--ok-glow)}
+  .gauge .gl{font-size:10px;color:var(--dim);letter-spacing:2px;font-weight:700;margin-top:3px}
+  .needle{transform-origin:100px 100px;transform:rotate(-90deg);
+    transition:transform 1s cubic-bezier(.34,1.56,.64,1)}
+  .needle line{stroke:var(--ok);stroke-width:3.5;stroke-linecap:round}
+  .needle circle{fill:#000;stroke:var(--ok);stroke-width:2.5}
+  .needle.warn line,.needle.warn circle{stroke:var(--warn)}
+  .needle.bad line,.needle.bad circle{stroke:var(--bad)}
+  .gauge.warn .gv{color:var(--warn);text-shadow:0 0 10px #ffb80055}
+  .gauge.bad .gv{color:var(--bad);text-shadow:0 0 10px #ff383855}
+  @media (max-width:520px){.gauges{gap:8px}.gauge{padding:10px 4px 6px}.gauge .gv{font-size:14px}}
   .theme-label{font-size:13px;font-weight:700;letter-spacing:.4px;color:var(--txt);
     margin:6px 0 2px;text-align:center;text-transform:uppercase;opacity:.85}
   .theme-divider{height:1px;background:linear-gradient(90deg,transparent,#1f1f1f,transparent);
     margin:18px 0 10px}
   .theme-wheel-sm{width:180px;height:180px}
   .theme-wheel-sm canvas{width:180px;height:180px}
+  /* LANA Engine — automotive-style gauges (TEMP / RPM / BOOST) */
+  .gauges-card{padding:14px 16px 12px;text-align:center}
+  .panel-title{font-size:10px;font-weight:800;color:var(--dim);letter-spacing:2.5px;
+       margin-bottom:8px;display:flex;align-items:center;gap:8px;justify-content:center}
+  .panel-title::before,.panel-title::after{content:"";flex:1;height:1px;
+       background:linear-gradient(90deg,transparent,var(--line),transparent);max-width:80px}
+  .gauges{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+  .gauge-wrap{flex:1;min-width:95px;max-width:140px}
+  .gauge{display:block;width:100%;height:auto;max-width:130px;margin:0 auto}
+  .gauge .needle{transform-origin:60px 60px;transition:transform 0.7s cubic-bezier(.34,.04,.36,.99)}
+  .gauge .arc-bg{stroke:#1f1f1f}
+  .gauge .arc-fg{transition:stroke-dasharray 0.7s ease-out}
   /* Hero: brand + live stats + animated system visualization */
   body{background-color:var(--bg);
        background-image:radial-gradient(1100px 500px at 110% -10%, #44D62C12, transparent 55%),
@@ -256,6 +285,22 @@
     </svg>
   </div>
 
+  <!-- engine telemetry: TEMP / RPM / BOOST -->
+  <div class="gauges">
+    <div class="gauge" id="tempGauge">
+      <svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg"><path d="M 20 100 A 80 80 0 0 1 180 100" stroke="#1f1f1f" stroke-width="14" fill="none" stroke-linecap="round"/><g class="needle" id="tempNeedle"><line x1="100" y1="100" x2="100" y2="28"/><circle cx="100" cy="100" r="9"/></g></svg>
+      <div class="gv" id="tempVal">—</div><div class="gl">TEMP</div>
+    </div>
+    <div class="gauge" id="rpmGauge">
+      <svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg"><path d="M 20 100 A 80 80 0 0 1 180 100" stroke="#1f1f1f" stroke-width="14" fill="none" stroke-linecap="round"/><g class="needle" id="rpmNeedle"><line x1="100" y1="100" x2="100" y2="28"/><circle cx="100" cy="100" r="9"/></g></svg>
+      <div class="gv" id="rpmVal">—</div><div class="gl">RPM</div>
+    </div>
+    <div class="gauge" id="boostGauge">
+      <svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg"><path d="M 20 100 A 80 80 0 0 1 180 100" stroke="#1f1f1f" stroke-width="14" fill="none" stroke-linecap="round"/><g class="needle" id="boostNeedle"><line x1="100" y1="100" x2="100" y2="28"/><circle cx="100" cy="100" r="9"/></g></svg>
+      <div class="gv" id="boostVal">—</div><div class="gl">BOOST</div>
+    </div>
+  </div>
+
   <!-- theme picker: change accent + background (Govee-style) -->
   <details ontoggle="if(this.open)initThemePicker()">
     <summary>🎨 Theme</summary>
@@ -318,6 +363,49 @@
       <div class="theme-presets" id="cardPresets"></div>
     </div>
   </details>
+
+  <!-- LANA ENGINE gauges: temp / rpm / boost -->
+  <div class="card gauges-card">
+    <div class="panel-title">LANA ENGINE</div>
+    <div class="gauges">
+      <div class="gauge-wrap">
+        <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
+          <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
+          <path class="arc-fg" id="arc-temp" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+          <g class="needle" id="needle-temp" style="transform:rotate(-135deg)">
+            <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
+          <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-temp">—</text>
+          <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">TEMP °F</text>
+        </svg>
+      </div>
+      <div class="gauge-wrap">
+        <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
+          <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
+          <path class="arc-fg" id="arc-rpm" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+          <g class="needle" id="needle-rpm" style="transform:rotate(-135deg)">
+            <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
+          <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-rpm">—</text>
+          <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">RPM × 1000</text>
+        </svg>
+      </div>
+      <div class="gauge-wrap">
+        <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
+          <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
+          <path class="arc-fg" id="arc-boost" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+          <g class="needle" id="needle-boost" style="transform:rotate(-135deg)">
+            <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
+          <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-boost">—</text>
+          <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">BOOST psi</text>
+        </svg>
+      </div>
+    </div>
+  </div>
 
   <!-- agent console: give LANA any task -->
   <div class="card">
@@ -611,10 +699,35 @@ let TEXTS_TODAY=0, EMAILS_TODAY=0;
 function paintHeroClock(){
   const el=document.getElementById('heroStat'); if(!el) return;
   const n=new Date();
-  const t=n.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true});
+  const t=n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
   el.textContent=`${t} · ${TEXTS_TODAY} texts · ${EMAILS_TODAY} emails handled today`;
 }
 setInterval(paintHeroClock, 1000);
+
+// LANA Engine gauges — TEMP / RPM / BOOST swing-needle animations driven by /status
+function setGauge(id, pct, valueText){
+  pct = Math.max(0, Math.min(100, pct));
+  document.getElementById('arc-' + id).setAttribute('stroke-dasharray', pct + ' 100');
+  const angle = -135 + (270 * pct / 100);
+  document.getElementById('needle-' + id).style.transform = 'rotate(' + angle + 'deg)';
+  document.getElementById('val-' + id).textContent = valueText;
+}
+function paintGauges(d){
+  const score = (d.health && d.health.score) || 0;
+  const texts = (d.imessage && d.imessage.replies_today) || 0;
+  const emails = (d.email && d.email.replies_today) || 0;
+  const cost = (d.cost && d.cost.cost) || 0;
+  // TEMP — operational temp: 100% health = 190°F (normal), drops in health heat it up
+  const tempF = Math.max(140, Math.min(260, 190 + (100 - score) * 2));
+  const tempPct = (tempF - 140) / 1.20;  // 140..260 -> 0..100
+  setGauge('temp', tempPct, Math.round(tempF));
+  // RPM — workload: messages handled today scaled to engine RPM
+  const rpm = Math.max(0, Math.min(8000, 700 + (texts + emails) * 65));
+  setGauge('rpm', rpm / 80, (rpm / 1000).toFixed(1));   // displayed as "x.x" ×1000
+  // BOOST — API spend as turbo psi (today's cost × 5)
+  const boostPsi = Math.max(-10, Math.min(25, cost * 5));
+  setGauge('boost', (boostPsi + 10) / 0.35, boostPsi.toFixed(1));  // -10..25 -> 0..100
+}
 function esc(s){return (s||"").replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 function setTog(id,on){
   const el=document.getElementById(id); if(!el) return;
@@ -1337,6 +1450,8 @@ async function load(){
     TEXTS_TODAY = d.imessage.replies_today;
     EMAILS_TODAY = d.email.replies_today;
     paintHeroClock();
+    // LANA Engine gauges
+    paintGauges(d);
     document.getElementById('imsg').textContent   = d.imessage.replies_today;
     document.getElementById('emails').textContent = d.email.replies_today;
     document.getElementById('cost').textContent   = '$'+(d.cost?d.cost.cost:0).toFixed(2);
