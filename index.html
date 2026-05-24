@@ -728,7 +728,7 @@ function paintHeroClock(){
   const eng=document.getElementById('engineClock'); if(eng) eng.textContent=t;
   // The smaller hero stat (LANA brand area) — clock + today's counts
   const el=document.getElementById('heroStat');
-  if(el) el.textContent=`${t} · ${TEXTS_TODAY} texts · ${EMAILS_TODAY} emails handled today`;
+  if(el) el.textContent=`${TEXTS_TODAY} texts · ${EMAILS_TODAY} emails handled today`;
 }
 setInterval(paintHeroClock, 1000);
 // Engine-style gauges (TEMP / RPM / BOOST)
