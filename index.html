@@ -353,22 +353,6 @@
     </svg>
   </div>
 
-  <!-- engine telemetry: TEMP / RPM / BOOST -->
-  <div class="gauges">
-    <div class="gauge" id="tempGauge">
-      <svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg"><path d="M 20 100 A 80 80 0 0 1 180 100" stroke="#1f1f1f" stroke-width="14" fill="none" stroke-linecap="round"/><g class="needle" id="tempNeedle"><line x1="100" y1="100" x2="100" y2="28"/><circle cx="100" cy="100" r="9"/></g></svg>
-      <div class="gv" id="tempVal">—</div><div class="gl">TEMP</div>
-    </div>
-    <div class="gauge" id="rpmGauge">
-      <svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg"><path d="M 20 100 A 80 80 0 0 1 180 100" stroke="#1f1f1f" stroke-width="14" fill="none" stroke-linecap="round"/><g class="needle" id="rpmNeedle"><line x1="100" y1="100" x2="100" y2="28"/><circle cx="100" cy="100" r="9"/></g></svg>
-      <div class="gv" id="rpmVal">—</div><div class="gl">RPM</div>
-    </div>
-    <div class="gauge" id="boostGauge">
-      <svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg"><path d="M 20 100 A 80 80 0 0 1 180 100" stroke="#1f1f1f" stroke-width="14" fill="none" stroke-linecap="round"/><g class="needle" id="boostNeedle"><line x1="100" y1="100" x2="100" y2="28"/><circle cx="100" cy="100" r="9"/></g></svg>
-      <div class="gv" id="boostVal">—</div><div class="gl">BOOST</div>
-    </div>
-  </div>
-
   <!-- theme picker: change accent + background (Govee-style) -->
   <details ontoggle="if(this.open)initThemePicker()">
     <summary>🎨 Theme</summary>
@@ -731,25 +715,6 @@ function paintHeroClock(){
   if(el) el.textContent=`${TEXTS_TODAY} texts · ${EMAILS_TODAY} emails handled today`;
 }
 setInterval(paintHeroClock, 1000);
-// Engine-style gauges (TEMP / RPM / BOOST)
-function setGauge(needleId, gaugeId, valueId, value, max, unit){
-  const pct=Math.max(0, Math.min(1, value/max));
-  const deg=-90 + pct*180;
-  const n=document.getElementById(needleId);
-  const g=document.getElementById(gaugeId);
-  const v=document.getElementById(valueId);
-  if(n) n.style.transform=`rotate(${deg}deg)`;
-  const warn=pct>0.66 && pct<=0.85, bad=pct>0.85;
-  [n,g].forEach(el=>{ if(!el) return; el.classList.toggle('warn',warn); el.classList.toggle('bad',bad); });
-  if(v) v.textContent=Math.round(value)+' '+unit;
-}
-function paintGauges(g){
-  if(!g) return;
-  setGauge('tempNeedle','tempGauge','tempVal', g.temp,  g.temp_max,  '°F');
-  setGauge('rpmNeedle', 'rpmGauge', 'rpmVal',  g.rpm,   g.rpm_max,   'RPM');
-  setGauge('boostNeedle','boostGauge','boostVal',g.boost,g.boost_max,'PSI');
-}
-
 // LANA Engine gauges — TEMP / RPM / BOOST swing-needle animations driven by /status
 function setGauge(id, pct, valueText){
   pct = Math.max(0, Math.min(100, pct));
