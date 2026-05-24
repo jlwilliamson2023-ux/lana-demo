@@ -216,6 +216,11 @@
   .clock-sub{font-size:9px;font-weight:800;color:var(--dim);letter-spacing:2.5px;margin-top:8px}
   @media (max-width:600px){.engine-row{flex-direction:column;gap:18px}
                            .engine-health{justify-content:center}}
+  /* 6-gauge diesel PID strip — responsive grid */
+  .engine-gauges{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;
+       margin-top:14px;position:relative;z-index:1}
+  @media (max-width:900px){.engine-gauges{grid-template-columns:repeat(3,1fr);gap:8px}}
+  @media (max-width:480px){.engine-gauges{grid-template-columns:repeat(2,1fr);gap:8px}}
   /* legacy class kept for back-compat */
   .gauges-card{padding:14px 16px 12px;text-align:center}
   .panel-title{font-size:10px;font-weight:800;color:var(--dim);letter-spacing:2.5px;
@@ -262,7 +267,7 @@
 </style>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230a0e14%22/><circle cx=%2250%22 cy=%2256%22 r=%2218%22 fill=%22%232ee6a0%22/></svg>"><title>LANA — AI Chief of Staff</title></head>
 <body>
-  <!-- LANA ENGINE — top cockpit panel: health ring + 3 gauges + live clock -->
+  <!-- LANA ENGINE — top cockpit panel: health ring + clock + 6 diesel PIDs -->
   <div class="engine-top">
     <div class="panel-title">⚡ LANA ENGINE ⚡</div>
     <div class="engine-row">
@@ -273,47 +278,84 @@
           <div class="msub" id="healthSub"></div>
         </div>
       </div>
-      <div class="gauges">
-        <div class="gauge-wrap">
-          <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
-            <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
-            <path class="arc-fg" id="arc-temp" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
-            <g class="needle" id="needle-temp" style="transform:rotate(-135deg)">
-              <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
-            </g>
-            <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
-            <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-temp">—</text>
-            <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">TEMP °F</text>
-          </svg>
-        </div>
-        <div class="gauge-wrap">
-          <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
-            <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
-            <path class="arc-fg" id="arc-rpm" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
-            <g class="needle" id="needle-rpm" style="transform:rotate(-135deg)">
-              <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
-            </g>
-            <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
-            <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-rpm">—</text>
-            <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">RPM × 1000</text>
-          </svg>
-        </div>
-        <div class="gauge-wrap">
-          <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
-            <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
-            <path class="arc-fg" id="arc-boost" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
-            <g class="needle" id="needle-boost" style="transform:rotate(-135deg)">
-              <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
-            </g>
-            <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
-            <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-boost">—</text>
-            <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">BOOST psi</text>
-          </svg>
-        </div>
-      </div>
       <div class="engine-clock">
         <div class="clock-time" id="engineClock">--:--:--</div>
         <div class="clock-sub" id="engineClockSub">PUSHING BOOST</div>
+      </div>
+    </div>
+    <!-- 6 diesel PIDs: TEMP / RPM / BOOST / COOLANT / OIL / TRANS -->
+    <div class="engine-gauges">
+      <div class="gauge-wrap">
+        <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
+          <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
+          <path class="arc-fg" id="arc-temp" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+          <g class="needle" id="needle-temp" style="transform:rotate(-135deg)">
+            <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
+          <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-temp">—</text>
+          <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">TEMP °F</text>
+        </svg>
+      </div>
+      <div class="gauge-wrap">
+        <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
+          <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
+          <path class="arc-fg" id="arc-rpm" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+          <g class="needle" id="needle-rpm" style="transform:rotate(-135deg)">
+            <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
+          <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-rpm">—</text>
+          <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">RPM × 1000</text>
+        </svg>
+      </div>
+      <div class="gauge-wrap">
+        <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
+          <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
+          <path class="arc-fg" id="arc-boost" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+          <g class="needle" id="needle-boost" style="transform:rotate(-135deg)">
+            <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
+          <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-boost">—</text>
+          <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">BOOST psi</text>
+        </svg>
+      </div>
+      <div class="gauge-wrap">
+        <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
+          <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
+          <path class="arc-fg" id="arc-coolant" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+          <g class="needle" id="needle-coolant" style="transform:rotate(-135deg)">
+            <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
+          <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-coolant">—</text>
+          <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">COOLANT °F</text>
+        </svg>
+      </div>
+      <div class="gauge-wrap">
+        <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
+          <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
+          <path class="arc-fg" id="arc-oil" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+          <g class="needle" id="needle-oil" style="transform:rotate(-135deg)">
+            <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
+          <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-oil">—</text>
+          <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">OIL psi</text>
+        </svg>
+      </div>
+      <div class="gauge-wrap">
+        <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
+          <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
+          <path class="arc-fg" id="arc-trans" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+          <g class="needle" id="needle-trans" style="transform:rotate(-135deg)">
+            <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
+          <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-trans">—</text>
+          <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">TRANS °F</text>
+        </svg>
       </div>
     </div>
   </div>
@@ -718,10 +760,14 @@ setInterval(paintHeroClock, 1000);
 // LANA Engine gauges — TEMP / RPM / BOOST swing-needle animations driven by /status
 function setGauge(id, pct, valueText){
   pct = Math.max(0, Math.min(100, pct));
-  document.getElementById('arc-' + id).setAttribute('stroke-dasharray', pct + ' 100');
+  const arc=document.getElementById('arc-' + id);
+  const needle=document.getElementById('needle-' + id);
+  const val=document.getElementById('val-' + id);
+  if(!arc || !needle || !val) return;
+  arc.setAttribute('stroke-dasharray', pct + ' 100');
   const angle = -135 + (270 * pct / 100);
-  document.getElementById('needle-' + id).style.transform = 'rotate(' + angle + 'deg)';
-  document.getElementById('val-' + id).textContent = valueText;
+  needle.style.transform = 'rotate(' + angle + 'deg)';
+  val.textContent = valueText;
 }
 function paintGauges(d){
   const score = (d.health && d.health.score) || 0;
@@ -731,24 +777,37 @@ function paintGauges(d){
   const wired = score >= 100;
   // When 199% healthy, LANA shows pushing-hard readings: hot, redlining, full boost.
   // Activity layers a little extra so the needles dance.
-  let tempF, rpm, boostPsi;
+  let tempF, rpm, boostPsi, coolantF, oilPsi, transF;
   if (wired) {
     tempF    = 240 + Math.min(texts + emails, 60) * 0.3;     // 240..258°F (running hot)
     rpm      = 7800 + Math.min(texts + emails, 30) * 35;     // 7800..8850 (redlining)
     boostPsi = 24 + Math.min(cost * 2.5, 4);                 // 24..28 psi (full boost)
+    // Diesel PIDs — Kenworth-style heavy-truck values under load
+    coolantF = 218 + Math.min(texts + emails, 30) * 0.25;    // 218..226°F (working hard, near alarm 230)
+    oilPsi   = 68 + Math.min(cost * 2, 5);                   // 68..73 psi (high-RPM oil pressure)
+    transF   = 212 + Math.min(texts + emails, 40) * 0.3;     // 212..224°F (trans hot under load)
   } else {
     // System struggling — pull the readings off peak
     tempF    = 200 + (100 - score) * 0.7;
     rpm      = 3000 + score * 35;
     boostPsi = 8  + score * 0.10;
+    coolantF = 190 + score * 0.20;
+    oilPsi   = 35 + score * 0.30;
+    transF   = 175 + score * 0.30;
   }
   tempF    = Math.max(140, Math.min(280, tempF));
   rpm      = Math.max(0,   Math.min(9000, rpm));
   boostPsi = Math.max(-10, Math.min(30,   boostPsi));
-  // Gauge ranges: TEMP 140-280, RPM 0-9000, BOOST -10..30 — normalize to 0-100
-  setGauge('temp',  (tempF - 140) / 1.40, Math.round(tempF));
-  setGauge('rpm',    rpm / 90,            (rpm / 1000).toFixed(1));
-  setGauge('boost', (boostPsi + 10) / 0.40, boostPsi.toFixed(1));
+  coolantF = Math.max(140, Math.min(260, coolantF));
+  oilPsi   = Math.max(0,   Math.min(100, oilPsi));
+  transF   = Math.max(140, Math.min(260, transF));
+  // Normalize each PID's native range to 0-100 for the arc/needle
+  setGauge('temp',    (tempF - 140) / 1.40,    Math.round(tempF));
+  setGauge('rpm',     rpm / 90,                (rpm / 1000).toFixed(1));
+  setGauge('boost',   (boostPsi + 10) / 0.40,  boostPsi.toFixed(1));
+  setGauge('coolant', (coolantF - 140) / 1.20, Math.round(coolantF));
+  setGauge('oil',     oilPsi,                  Math.round(oilPsi));
+  setGauge('trans',   (transF - 140) / 1.20,   Math.round(transF));
 }
 function esc(s){return (s||"").replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 function setTog(id,on){
