@@ -197,7 +197,26 @@
     margin:18px 0 10px}
   .theme-wheel-sm{width:180px;height:180px}
   .theme-wheel-sm canvas{width:180px;height:180px}
-  /* LANA Engine — automotive-style gauges (TEMP / RPM / BOOST) */
+  /* LANA Engine OVERCLOCKED — top-of-dashboard cockpit panel */
+  .engine-top{padding:18px 18px 14px;text-align:center;
+    background:linear-gradient(135deg,#0c0c0c 0%,#000000 100%);
+    border:1px solid var(--line);border-radius:18px;margin:0 0 18px;
+    position:relative;overflow:hidden;
+    box-shadow:0 8px 32px rgba(0,0,0,.6), inset 0 1px 0 var(--ok-glow-soft)}
+  .engine-top::before{content:"";position:absolute;left:50%;top:-30%;width:60%;height:160%;
+    background:radial-gradient(ellipse at center, var(--ok-glow-tint) 0%, transparent 65%);
+    pointer-events:none;transform:translateX(-50%)}
+  .engine-row{display:flex;gap:16px;align-items:center;justify-content:space-around;
+    flex-wrap:wrap;position:relative;z-index:1;margin-top:6px}
+  .engine-health{display:flex;gap:12px;align-items:center;text-align:left;min-width:160px}
+  .engine-clock{text-align:center;min-width:140px}
+  .clock-time{font-size:34px;font-weight:800;color:var(--ok);letter-spacing:3px;
+    font-family:"SF Mono",ui-monospace,monospace;text-shadow:0 0 14px var(--ok-glow);
+    line-height:1;font-variant-numeric:tabular-nums}
+  .clock-sub{font-size:9px;font-weight:800;color:var(--dim);letter-spacing:2.5px;margin-top:8px}
+  @media (max-width:600px){.engine-row{flex-direction:column;gap:18px}
+                           .engine-health{justify-content:center}}
+  /* legacy class kept for back-compat */
   .gauges-card{padding:14px 16px 12px;text-align:center}
   .panel-title{font-size:10px;font-weight:800;color:var(--dim);letter-spacing:2.5px;
        margin-bottom:8px;display:flex;align-items:center;gap:8px;justify-content:center}
@@ -243,20 +262,69 @@
 </style>
 <script>(function(){var D={status:{"time": "9:41:00 AM \u2014 Friday, May 22 2026", "health": {"score": 100, "healthy": 13, "total": 13, "label": "All systems healthy", "state": "ok"}, "control": {"state": "active", "paused_until": 0, "quiet_enabled": true, "quiet_start": 22, "quiet_end": 7, "text_enabled": true, "email_enabled": true}, "cost": {"cost": 2.14, "in": 184000, "out": 39000}, "memory": {"commitments": [{"id": "d1", "who": "Marcus (seller agent)", "text": "send signed LOI on Oakwood", "due": "2026-05-23", "done": false}, {"id": "d2", "who": "Lender", "text": "submit updated financials", "due": "2026-05-26", "done": false}], "followups": [{"id": "f1", "who": "Property manager", "channel": "email", "summary": "needs approval on the new roof bid ($14k)"}]}, "priority": {"due_today": [{"id": "d1", "who": "Marcus", "text": "send signed LOI on Oakwood", "due": "2026-05-23"}], "followups": [{"id": "f1", "who": "Property manager", "summary": "needs approval on the new roof bid ($14k)"}]}, "finance": {"total": 3284.55, "count": 11, "categories": [{"name": "real estate", "amount": 1850.0}, {"name": "software", "amount": 612.55}, {"name": "travel", "amount": 489.0}, {"name": "dining", "amount": 218.0}, {"name": "fuel", "amount": 115.0}], "recent": [{"merchant": "Home Depot", "amount": 842.19, "date": "2026-05-21", "category": "real estate"}, {"merchant": "Delta Air Lines", "amount": 489.0, "date": "2026-05-20", "category": "travel"}, {"merchant": "QuickBooks", "amount": 90.0, "date": "2026-05-20", "category": "software"}]}, "upcoming": [{"type": "travel", "summary": "Flight DFW\u2192PHX, Tue 6:05 AM (deal tour)", "when": "2026-05-27"}, {"type": "package", "summary": "Smart locks (8) out for delivery", "when": "2026-05-23"}], "backup": {"count": 14, "latest": "lana-backup-20260522-033000.tar.gz", "latest_when": "May 22 03:30"}, "tasks": [{"id": "t1", "text": "Review roof bid and approve", "due": "2026-05-22", "who": "Property manager", "done": false}, {"id": "t2", "text": "Wire earnest money for Oakwood", "due": "2026-05-23", "who": "", "done": false}, {"id": "t3", "text": "Call insurance about RV park policy", "due": "", "who": "", "done": false}], "decisions": [{"id": "x1", "text": "Going with the Oakwood 8-unit over Riverside \u2014 better cap rate", "when": "2026-05-21T16:20"}, {"id": "x2", "text": "Standardizing on QuickBooks for all entities", "when": "2026-05-19T11:05"}], "deals": [{"id": "g1", "name": "Oakwood 8-unit multifamily", "stage": "closing", "value": "$1.2M", "who": "Marcus (seller agent)", "next_action": "send signed LOI"}, {"id": "g2", "name": "Sunset RV Park (42 pads)", "stage": "negotiating", "value": "$2.8M", "who": "owner direct", "next_action": "counter at $2.65M"}, {"id": "g3", "name": "Maple Duplex", "stage": "lead", "value": "$320k", "who": "Zillow FSBO", "next_action": "schedule walkthrough"}], "approvals": [{"id": "a1", "kind": "email", "summary": "Email Marcus \u2014 LOI follow-up + close timeline", "source": "agent", "created": "2026-05-22T09:38"}, {"id": "a2", "kind": "text", "summary": "Text property manager: approved on the $14k roof bid", "source": "agent", "created": "2026-05-22T09:39"}], "workflows": [{"id": "w1", "name": "Lender emails", "trigger_type": "email_from", "trigger_value": "lender", "action_type": "priority", "enabled": true}, {"id": "w2", "name": "Offer keyword", "trigger_type": "email_subject", "trigger_value": "offer", "action_type": "add_task", "enabled": true}, {"id": "w3", "name": "Wife texts", "trigger_type": "text_contains", "trigger_value": "pick up", "action_type": "notify", "enabled": true}], "contacts": [{"name": "Marcus (seller agent)", "rule": "vip"}, {"name": "Spam Likely", "rule": "muted"}], "trends": {"top_contacts": [{"name": "Marcus", "count": 14}, {"name": "Property mgr", "count": 9}, {"name": "Lender", "count": 7}, {"name": "Spouse", "count": 6}], "by_hour": [0, 0, 0, 0, 0, 0, 1, 3, 6, 9, 7, 5, 8, 6, 4, 7, 5, 3, 4, 2, 1, 0, 0, 0]}, "services": [{"name": "iMessage Secretary", "ok": true, "alive": true, "pid": 4101, "scheduled": false}, {"name": "Email Secretary", "ok": true, "alive": true, "pid": 4102, "scheduled": false}, {"name": "Voice / Command", "ok": true, "alive": true, "pid": 4103, "scheduled": false}, {"name": "Hey LANA / F5", "ok": true, "alive": true, "pid": 4104, "scheduled": false}, {"name": "Agent Engine", "ok": true, "alive": true, "pid": 4105, "scheduled": false}, {"name": "Calendar Sync", "ok": true, "alive": true, "pid": 0, "scheduled": true}, {"name": "Morning Briefing", "ok": true, "alive": true, "pid": 0, "scheduled": true}, {"name": "Meeting Prep", "ok": true, "alive": true, "pid": 0, "scheduled": true}, {"name": "Daily Backup", "ok": true, "alive": true, "pid": 0, "scheduled": true}, {"name": "Health Watchdog", "ok": true, "alive": true, "pid": 0, "scheduled": true}], "imessage": {"replies_today": 47, "recent": [{"time": "09:36", "text": "Marcus: \u201cocean view unit still available?\u201d \u2192 yep, 201 is open. want me to send the lease?"}, {"time": "09:18", "text": "Spouse: \u201ccan you grab dinner?\u201d \u2192 yeah on it, home by 6"}, {"time": "08:52", "text": "Contractor: \u201croof done thursday\u201d \u2192 perfect, send the invoice when ready"}]}, "email": {"replies_today": 12, "recent": [{"time": "09:30", "text": "Re: Oakwood financials \u2014 attached the updated rent roll and T-12, let me know..."}, {"time": "08:40", "text": "Re: Insurance quote \u2014 thanks, the RV park coverage looks good, let's bind it."}], "queue": [{"id": "q1", "name": "Title company", "subject": "Closing docs for review", "fires_at": 9999999999}], "held_reason": ""}},agent:{"task": "Research current multifamily cap rates in Dallas and build a comparison", "done": true, "steps": [{"kind": "start", "detail": "Research current multifamily cap rates in Dallas and build a comparison", "t": "09:40:01"}, {"kind": "tool", "detail": "web_search: Dallas multifamily cap rates 2026", "t": "09:40:04"}, {"kind": "think", "detail": "Found current ranges from CBRE and Marcus & Millichap. Compiling.", "t": "09:40:09"}, {"kind": "tool", "detail": "run_python: build cap_rate_comparison.xlsx", "t": "09:40:12"}, {"kind": "done", "detail": "Built the comparison spreadsheet with 5 submarkets.", "t": "09:40:15"}], "result": "Done \u2705 Dallas multifamily cap rates are currently averaging ~5.4%\u20136.2% depending on submarket and class. I built **cap_rate_comparison.xlsx** comparing 5 submarkets (Uptown, Plano, Frisco, Arlington, Garland) with class A/B/C cap rate ranges and a notes column. Frisco class-B looks like the best risk-adjusted entry right now.", "files": ["cap_rate_comparison.xlsx"]},docs:{"documents": [{"name": "cap_rate_comparison.xlsx", "size": 6144, "when": "May 22 09:40"}, {"name": "oakwood_LOI.pdf", "size": 18432, "when": "May 21 16:22"}, {"name": "Q2_investor_update.docx", "size": 12288, "when": "May 20 14:10"}]},audit:{"entries": [{"when": "05-22 09:36", "channel": "text", "to": "Marcus", "content": "yep, 201 is open. want me to send the lease?"}, {"when": "05-22 09:30", "channel": "email", "to": "Title company", "content": "thanks, reviewing the closing docs now."}, {"when": "05-22 08:52", "channel": "text", "to": "Contractor", "content": "perfect, send the invoice when ready."}, {"when": "05-21 17:14", "channel": "email", "to": "Lender", "content": "attached the updated T-12 and rent roll for Oakwood."}]}};window.fetch=function(u,o){u=''+u;var b={};if(u.indexOf('/agent-status')>=0)b=D.agent;else if(u.indexOf('/status')>=0)b=D.status;else if(u.indexOf('/documents')>=0)b=D.docs;else if(u.indexOf('/audit')>=0)b=D.audit;else if(u.indexOf('/agent-task')>=0)b={ok:true,id:'demo'};else if(u.indexOf('/document')>=0)return Promise.resolve({ok:true,text:function(){return Promise.resolve('Sample document — LANA demo.');},json:function(){return Promise.resolve({});}});else if(o&&o.method==='POST')b={ok:true,demo:true};return Promise.resolve({ok:true,json:function(){return Promise.resolve(b);},text:function(){return Promise.resolve(JSON.stringify(b));}});};if('serviceWorker' in navigator){navigator.serviceWorker.register=function(){return Promise.reject('demo');};}})();</script><link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230a0e14%22/><circle cx=%2250%22 cy=%2256%22 r=%2218%22 fill=%22%232ee6a0%22/></svg>"><title>LANA — AI Chief of Staff</title></head>
 <body>
+  <!-- LANA ENGINE — top cockpit panel: health ring + 3 gauges + live clock -->
+  <div class="engine-top">
+    <div class="panel-title">⚡ LANA ENGINE · OVERCLOCKED ⚡</div>
+    <div class="engine-row">
+      <div class="engine-health">
+        <div class="ring" id="ring"><span id="ringPct">–</span></div>
+        <div>
+          <div class="mlabel" id="healthLabel">checking…</div>
+          <div class="msub" id="healthSub"></div>
+        </div>
+      </div>
+      <div class="gauges">
+        <div class="gauge-wrap">
+          <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
+            <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
+            <path class="arc-fg" id="arc-temp" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+            <g class="needle" id="needle-temp" style="transform:rotate(-135deg)">
+              <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
+            </g>
+            <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
+            <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-temp">—</text>
+            <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">TEMP °F</text>
+          </svg>
+        </div>
+        <div class="gauge-wrap">
+          <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
+            <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
+            <path class="arc-fg" id="arc-rpm" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+            <g class="needle" id="needle-rpm" style="transform:rotate(-135deg)">
+              <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
+            </g>
+            <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
+            <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-rpm">—</text>
+            <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">RPM × 1000</text>
+          </svg>
+        </div>
+        <div class="gauge-wrap">
+          <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
+            <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
+            <path class="arc-fg" id="arc-boost" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+            <g class="needle" id="needle-boost" style="transform:rotate(-135deg)">
+              <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
+            </g>
+            <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
+            <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-boost">—</text>
+            <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">BOOST psi</text>
+          </svg>
+        </div>
+      </div>
+      <div class="engine-clock">
+        <div class="clock-time" id="engineClock">--:--:--</div>
+        <div class="clock-sub" id="engineClockSub">PUSHING BOOST</div>
+      </div>
+    </div>
+  </div>
+
   <!-- hero: brand + live stats + animated system visualization -->
   <div class="hero">
     <div class="hero-status" title="LIVE">●</div>
     <div class="hero-left">
       <h1>LANA<span class="dot">.</span></h1>
       <div class="tag">your AI Chief of Staff</div>
-      <div class="hero-meter">
-        <div class="ring" id="ring"><span id="ringPct">–</span></div>
-        <div>
-          <div class="mlabel" id="healthLabel">checking…</div>
-          <div class="msub" id="healthSub"></div>
-          <div class="hero-stat" id="heroStat">loading…</div>
-        </div>
-      </div>
+      <div class="hero-stat" id="heroStat" style="margin-top:10px">loading…</div>
     </div>
     <svg class="hero-svg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-label="LANA system">
       <defs>
@@ -363,49 +431,6 @@
       <div class="theme-presets" id="cardPresets"></div>
     </div>
   </details>
-
-  <!-- LANA ENGINE gauges: temp / rpm / boost -->
-  <div class="card gauges-card">
-    <div class="panel-title">LANA ENGINE</div>
-    <div class="gauges">
-      <div class="gauge-wrap">
-        <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
-          <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
-          <path class="arc-fg" id="arc-temp" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
-          <g class="needle" id="needle-temp" style="transform:rotate(-135deg)">
-            <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
-          </g>
-          <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
-          <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-temp">—</text>
-          <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">TEMP °F</text>
-        </svg>
-      </div>
-      <div class="gauge-wrap">
-        <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
-          <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
-          <path class="arc-fg" id="arc-rpm" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
-          <g class="needle" id="needle-rpm" style="transform:rotate(-135deg)">
-            <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
-          </g>
-          <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
-          <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-rpm">—</text>
-          <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">RPM × 1000</text>
-        </svg>
-      </div>
-      <div class="gauge-wrap">
-        <svg class="gauge" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
-          <path class="arc-bg" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke-width="6" stroke-linecap="round"/>
-          <path class="arc-fg" id="arc-boost" d="M 28.18 91.82 A 45 45 0 1 0 91.82 91.82" fill="none" stroke="var(--ok)" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
-          <g class="needle" id="needle-boost" style="transform:rotate(-135deg)">
-            <line x1="60" y1="60" x2="60" y2="22" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>
-          </g>
-          <circle cx="60" cy="60" r="4" fill="var(--ok)" stroke="#000" stroke-width="1.5"/>
-          <text x="60" y="78" text-anchor="middle" fill="var(--txt)" font-size="13" font-weight="800" id="val-boost">—</text>
-          <text x="60" y="102" text-anchor="middle" fill="var(--dim)" font-size="8" letter-spacing="1.5" font-weight="700">BOOST psi</text>
-        </svg>
-      </div>
-    </div>
-  </div>
 
   <!-- agent console: give LANA any task -->
   <div class="card">
@@ -697,12 +722,33 @@ let FEAT={text_enabled:true, email_enabled:true};
 // Live clock — updates every second using local time, with cached today's counts
 let TEXTS_TODAY=0, EMAILS_TODAY=0;
 function paintHeroClock(){
-  const el=document.getElementById('heroStat'); if(!el) return;
   const n=new Date();
   const t=n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
-  el.textContent=`${t} · ${TEXTS_TODAY} texts · ${EMAILS_TODAY} emails handled today`;
+  // The big cockpit clock in the engine panel (top of dashboard)
+  const eng=document.getElementById('engineClock'); if(eng) eng.textContent=t;
+  // The smaller hero stat (LANA brand area) — clock + today's counts
+  const el=document.getElementById('heroStat');
+  if(el) el.textContent=`${t} · ${TEXTS_TODAY} texts · ${EMAILS_TODAY} emails handled today`;
 }
 setInterval(paintHeroClock, 1000);
+// Engine-style gauges (TEMP / RPM / BOOST)
+function setGauge(needleId, gaugeId, valueId, value, max, unit){
+  const pct=Math.max(0, Math.min(1, value/max));
+  const deg=-90 + pct*180;
+  const n=document.getElementById(needleId);
+  const g=document.getElementById(gaugeId);
+  const v=document.getElementById(valueId);
+  if(n) n.style.transform=`rotate(${deg}deg)`;
+  const warn=pct>0.66 && pct<=0.85, bad=pct>0.85;
+  [n,g].forEach(el=>{ if(!el) return; el.classList.toggle('warn',warn); el.classList.toggle('bad',bad); });
+  if(v) v.textContent=Math.round(value)+' '+unit;
+}
+function paintGauges(g){
+  if(!g) return;
+  setGauge('tempNeedle','tempGauge','tempVal', g.temp,  g.temp_max,  '°F');
+  setGauge('rpmNeedle', 'rpmGauge', 'rpmVal',  g.rpm,   g.rpm_max,   'RPM');
+  setGauge('boostNeedle','boostGauge','boostVal',g.boost,g.boost_max,'PSI');
+}
 
 // LANA Engine gauges — TEMP / RPM / BOOST swing-needle animations driven by /status
 function setGauge(id, pct, valueText){
@@ -717,16 +763,27 @@ function paintGauges(d){
   const texts = (d.imessage && d.imessage.replies_today) || 0;
   const emails = (d.email && d.email.replies_today) || 0;
   const cost = (d.cost && d.cost.cost) || 0;
-  // TEMP — operational temp: 100% health = 190°F (normal), drops in health heat it up
-  const tempF = Math.max(140, Math.min(260, 190 + (100 - score) * 2));
-  const tempPct = (tempF - 140) / 1.20;  // 140..260 -> 0..100
-  setGauge('temp', tempPct, Math.round(tempF));
-  // RPM — workload: messages handled today scaled to engine RPM
-  const rpm = Math.max(0, Math.min(8000, 700 + (texts + emails) * 65));
-  setGauge('rpm', rpm / 80, (rpm / 1000).toFixed(1));   // displayed as "x.x" ×1000
-  // BOOST — API spend as turbo psi (today's cost × 5)
-  const boostPsi = Math.max(-10, Math.min(25, cost * 5));
-  setGauge('boost', (boostPsi + 10) / 0.35, boostPsi.toFixed(1));  // -10..25 -> 0..100
+  const wired = score >= 100;
+  // OVERCLOCKED theme — when 199%, LANA is pushing hard: hot, redlining, full boost.
+  // Activity layers a little extra so the needles dance.
+  let tempF, rpm, boostPsi;
+  if (wired) {
+    tempF    = 240 + Math.min(texts + emails, 60) * 0.3;     // 240..258°F (running hot)
+    rpm      = 7800 + Math.min(texts + emails, 30) * 35;     // 7800..8850 (redlining)
+    boostPsi = 24 + Math.min(cost * 2.5, 4);                 // 24..28 psi (full boost)
+  } else {
+    // System struggling — pull the readings off peak
+    tempF    = 200 + (100 - score) * 0.7;
+    rpm      = 3000 + score * 35;
+    boostPsi = 8  + score * 0.10;
+  }
+  tempF    = Math.max(140, Math.min(280, tempF));
+  rpm      = Math.max(0,   Math.min(9000, rpm));
+  boostPsi = Math.max(-10, Math.min(30,   boostPsi));
+  // Gauge ranges: TEMP 140-280, RPM 0-9000, BOOST -10..30 — normalize to 0-100
+  setGauge('temp',  (tempF - 140) / 1.40, Math.round(tempF));
+  setGauge('rpm',    rpm / 90,            (rpm / 1000).toFixed(1));
+  setGauge('boost', (boostPsi + 10) / 0.40, boostPsi.toFixed(1));
 }
 function esc(s){return (s||"").replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 function setTog(id,on){
@@ -1450,6 +1507,7 @@ async function load(){
     TEXTS_TODAY = d.imessage.replies_today;
     EMAILS_TODAY = d.email.replies_today;
     paintHeroClock();
+    paintGauges(d.gauges);
     // LANA Engine gauges
     paintGauges(d);
     document.getElementById('imsg').textContent   = d.imessage.replies_today;
