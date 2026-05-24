@@ -606,6 +606,15 @@
 const TOKEN="demo";
 let QUIET=false, QS=22, QE=7;
 let FEAT={text_enabled:true, email_enabled:true};
+// Live clock — updates every second using local time, with cached today's counts
+let TEXTS_TODAY=0, EMAILS_TODAY=0;
+function paintHeroClock(){
+  const el=document.getElementById('heroStat'); if(!el) return;
+  const n=new Date();
+  const t=n.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true});
+  el.textContent=`${t} · ${TEXTS_TODAY} texts · ${EMAILS_TODAY} emails handled today`;
+}
+setInterval(paintHeroClock, 1000);
 function esc(s){return (s||"").replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 function setTog(id,on){
   const el=document.getElementById(id); if(!el) return;
@@ -1324,9 +1333,10 @@ async function load(){
   try{
     const r = await fetch('/status',{cache:'no-store'});
     const d = await r.json();
-    const _t = (d.time||'').split(' — ')[0];
-    document.getElementById('heroStat').textContent =
-      `${_t} · ${d.imessage.replies_today} texts · ${d.email.replies_today} emails handled today`;
+    // Cache today's counts; the 1-second clock interval below paints the live time.
+    TEXTS_TODAY = d.imessage.replies_today;
+    EMAILS_TODAY = d.email.replies_today;
+    paintHeroClock();
     document.getElementById('imsg').textContent   = d.imessage.replies_today;
     document.getElementById('emails').textContent = d.email.replies_today;
     document.getElementById('cost').textContent   = '$'+(d.cost?d.cost.cost:0).toFixed(2);
